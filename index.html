@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Salvadanaio Vacanza</title>
+    <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/app-icon.svg" />
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="assets/app-icon.svg" />
+    <link rel="manifest" href="site.webmanifest" />
+    <meta name="theme-color" content="#0aa39f" />
+    <meta name="apple-mobile-web-app-title" content="GR Vacanza" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="sparkles" aria-hidden="true"></canvas>
+    <div id="bigDepositToast" class="big-toast" aria-live="polite">
+      <span class="love-face face-one" aria-hidden="true">😍</span>
+      <span class="love-face face-two" aria-hidden="true">🥰</span>
+      <span class="love-face face-three" aria-hidden="true">💘</span>
+      <strong>Grande!</strong>
+    </div>
+    <div id="smallDepositToast" class="small-toast" aria-live="polite">Bel passo</div>
+    <div id="tinyDepositToast" class="tiny-toast" aria-live="polite">
+      <span aria-hidden="true">🔥</span>
+      <strong>Avanti.</strong>
+    </div>
+    <div id="moneyRiseLayer" class="money-rise-layer" aria-hidden="true"></div>
+    <div id="fireworkToast" class="firework-toast" aria-live="polite">
+      <strong id="fireworkPhrase">State costruendo qualcosa di grande.</strong>
+    </div>
+    <div id="fireworkLayer" class="firework-layer" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="topbar app-topbar">
+        <div class="brand">
+          <div class="brand-mark">GR</div>
+          <div>
+            <span>Travel vault</span>
+            <strong>Gabri & Rossi</strong>
+          </div>
+        </div>
+        <button id="menuButton" class="round-button menu-button" type="button" aria-label="Apri menu">
+          <span class="nav-dot"></span>
+        </button>
+      </header>
+
+      <section class="hero home-view">
+        <div class="hero-media">
+          <video id="heroVideoA" class="hero-video is-active" autoplay muted playsinline poster="assets/travel-piggy.png">
+            <source src="assets/vacanza-bg.mp4" type="video/mp4" />
+          </video>
+          <video id="heroVideoB" class="hero-video" muted playsinline poster="assets/travel-piggy.png"></video>
+          <img src="assets/travel-piggy.png" alt="Salvadanaio da viaggio" />
+        </div>
+
+        <div class="hero-shade"></div>
+
+        <div class="hero-inner">
+          <section class="quote-block">
+            <h1 id="heroQuote">Ogni deposito conta.</h1>
+            <p id="dailyMotivation">Ogni giorno che passa siete piu vicini alla partenza.</p>
+          </section>
+
+          <section class="vault-card" aria-label="Riepilogo salvadanaio">
+            <div class="vault-total">
+              <span>Gia nel salvadanaio</span>
+              <strong id="savedTotal">EUR 0</strong>
+            </div>
+
+            <div class="progress-track">
+              <div id="progressFill" class="progress-fill"></div>
+            </div>
+
+            <div class="vault-metrics">
+              <div>
+                <span>Completato</span>
+                <strong id="progressPercent">0%</strong>
+              </div>
+              <div class="right">
+                <span>Mancano</span>
+                <strong id="remainingTotal">EUR 0</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="metrics-grid home-view">
+        <article class="metric-card">
+          <div class="metric-icon gabri-icon">G</div>
+          <div class="metric-copy">
+            <span>Gabri</span>
+            <strong id="gabriTotal">EUR 0</strong>
+            <small>totale raccolto</small>
+          </div>
+        </article>
+        <article class="metric-card">
+          <div class="metric-icon rossi-icon">R</div>
+          <div class="metric-copy">
+            <span>Rossi</span>
+            <strong id="rossiTotal">EUR 0</strong>
+            <small>totale raccolto</small>
+          </div>
+        </article>
+        <article class="metric-card accent">
+          <div class="metric-icon target-icon">03</div>
+          <div class="metric-copy">
+            <span>Obiettivo marzo 2027</span>
+            <strong id="monthlyPace">EUR 0 / mese</strong>
+            <small>da mettere ogni mese</small>
+          </div>
+        </article>
+      </section>
+
+      <section class="workspace home-view">
+        <article class="panel">
+          <div class="section-title">
+            <span>Movimenti</span>
+            <strong>Depositi extra</strong>
+          </div>
+          <div id="depositFeed" class="deposit-feed"></div>
+          <button id="resetButton" class="ghost-button" type="button">Azzera extra</button>
+        </article>
+      </section>
+
+      <section class="details-grid home-view home-details">
+        <article class="panel">
+          <div class="section-title">
+            <span>Entrate</span>
+            <strong>Statistiche veloci</strong>
+          </div>
+          <div id="monthList" class="month-list compact-stats"></div>
+        </article>
+      </section>
+
+      <section id="depositView" class="page-view deposit-view is-hidden">
+        <form class="deposit-experience" id="savingForm">
+          <div class="deposit-orbit" aria-hidden="true">
+            <span class="coin coin-one">€</span>
+            <span class="coin coin-two">+</span>
+            <span class="coin coin-three">GR</span>
+          </div>
+
+          <div class="section-title">
+            <span>Azione veloce</span>
+            <strong>Aggiungi deposito</strong>
+          </div>
+
+          <div class="form-row deposit-step step-one">
+            <label>
+              Chi
+              <select id="person" required>
+                <option value="Gabri">Gabri</option>
+                <option value="Rossi">Rossi</option>
+                <option value="Insieme">Insieme</option>
+              </select>
+            </label>
+            <label>
+              Importo
+              <input id="amount" type="number" min="1" step="0.01" placeholder="50" required />
+            </label>
+          </div>
+
+          <label class="deposit-step step-two">
+            Nota
+            <input id="note" type="text" maxlength="40" placeholder="Revolut, bonus, resto..." />
+          </label>
+
+          <div class="impact deposit-step step-three">
+            <span>Impatto</span>
+            <strong id="impactPreview">+0,0%</strong>
+          </div>
+
+          <button class="primary-button deposit-step step-four" type="submit">Salva deposito</button>
+          <button id="cancelEditButton" class="ghost-button edit-cancel is-hidden" type="button">Annulla modifica</button>
+        </form>
+
+        <article class="panel deposit-history-panel">
+          <div class="section-title">
+            <span>Cronologia</span>
+            <strong>Depositi salvati</strong>
+          </div>
+          <div id="depositHistory" class="deposit-feed"></div>
+        </article>
+      </section>
+
+      <section id="expensesView" class="page-view expenses-view is-hidden">
+        <article class="panel expenses-panel">
+          <div class="section-title">
+            <span>Budget viaggio</span>
+            <strong>Spese previste</strong>
+          </div>
+          <p class="view-intro">Qui vedete dove andranno i soldi del salvadanaio.</p>
+          <div id="expensesSummary" class="expenses-summary"></div>
+          <div id="costList" class="cost-list"></div>
+        </article>
+      </section>
+
+      <section id="statsView" class="page-view stats-view is-hidden">
+        <article class="panel stats-panel">
+          <div class="section-title">
+            <span>Confronto</span>
+            <strong>Statistiche salvadanaio</strong>
+          </div>
+          <div class="stats-switch" role="tablist" aria-label="Seleziona statistiche">
+            <span id="statsSwitchIndicator" class="stats-switch-indicator" aria-hidden="true"></span>
+            <button class="stats-tab is-active" type="button" data-stat="gabri">Gabri</button>
+            <button class="stats-tab" type="button" data-stat="rossi">Rossi</button>
+            <button class="stats-tab" type="button" data-stat="insieme">Insieme</button>
+          </div>
+          <div id="statsContent" class="stats-content"></div>
+        </article>
+      </section>
+
+      <nav class="bottom-nav" aria-label="Navigazione principale">
+        <button id="homeMenuItem" class="bottom-nav-item is-active" type="button">
+          <span class="nav-icon">⌂</span>
+          <strong>Home</strong>
+        </button>
+        <button id="depositMenuItem" class="bottom-nav-item" type="button">
+          <span class="nav-icon">＋</span>
+          <strong>Deposita</strong>
+        </button>
+        <button id="statsMenuItem" class="bottom-nav-item" type="button">
+          <span class="nav-icon">◷</span>
+          <strong>Statistiche</strong>
+        </button>
+        <button id="expensesMenuItem" class="bottom-nav-item" type="button">
+          <span class="nav-icon">€</span>
+          <strong>Spese</strong>
+        </button>
+      </nav>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
