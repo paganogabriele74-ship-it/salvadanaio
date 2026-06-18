@@ -148,11 +148,7 @@ let smallDepositMessageIndex = 0;
 let tinyDepositMessageIndex = 0;
 let fireworkMessageIndex = 0;
 
-const heroVideos = ["assets/vacanza-bg.mp4", "assets/vacanza-bg-2.MP4"];
 let heroQuoteIndex = 0;
-let heroVideoIndex = 0;
-let activeHeroVideo = 0;
-let isVideoTransitioning = false;
 let activeStatsMode = "gabri";
 
 function money(value) {
@@ -643,54 +639,6 @@ function drawSparkles() {
   frame();
 }
 
-function setupHeroVideos() {
-  const players = [elements.heroVideoA, elements.heroVideoB].filter(Boolean);
-  if (players.length < 2) return;
-
-  players[0].src = heroVideos[0];
-  players[0].play().catch(() => {});
-  preloadNextHeroVideo(players);
-
-  players.forEach((player) => {
-    player.addEventListener("timeupdate", () => {
-      if (!player.classList.contains("is-active") || isVideoTransitioning || !Number.isFinite(player.duration)) return;
-      if (player.duration - player.currentTime < 1.7) transitionHeroVideo(players);
-    });
-    player.addEventListener("ended", () => {
-      if (!isVideoTransitioning) transitionHeroVideo(players);
-    });
-  });
-}
-
-function preloadNextHeroVideo(players) {
-  const next = players[1 - activeHeroVideo];
-  const nextIndex = (heroVideoIndex + 1) % heroVideos.length;
-  next.src = heroVideos[nextIndex];
-  next.load();
-}
-
-function transitionHeroVideo(players) {
-  if (isVideoTransitioning) return;
-  isVideoTransitioning = true;
-  const current = players[activeHeroVideo];
-  const next = players[1 - activeHeroVideo];
-  heroVideoIndex = (heroVideoIndex + 1) % heroVideos.length;
-  next.currentTime = 0;
-
-  next.play().then(() => {
-    next.classList.add("is-active");
-    current.classList.remove("is-active");
-    setTimeout(() => {
-      current.pause();
-      activeHeroVideo = 1 - activeHeroVideo;
-      preloadNextHeroVideo(players);
-      isVideoTransitioning = false;
-    }, 1500);
-  }).catch(() => {
-    isVideoTransitioning = false;
-  });
-}
-
 function renderAll() {
   renderStats();
   renderMonths();
@@ -790,6 +738,5 @@ function showExpenses() {
 
 renderAll();
 drawSparkles();
-setupHeroVideos();
 setInterval(rotateHeroQuote, 30000);
 window.addEventListener("resize", moveStatsIndicator);
