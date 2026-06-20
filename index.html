@@ -1330,5 +1330,62 @@
       });
     })();
   </script>
+  <script>
+    (() => {
+      const cloudStateKey = "travelVaultCloudDepositSignature";
+
+      function hasSupabaseConfig() {
+        return typeof SALVADANAIO_SYNC !== "undefined"
+          && SALVADANAIO_SYNC?.supabaseUrl
+          && SALVADANAIO_SYNC?.supabaseAnonKey
+          && !String(SALVADANAIO_SYNC.supabaseUrl).includes("INCOLLA_QUI")
+          && !String(SALVADANAIO_SYNC.supabaseAnonKey).includes("INCOLLA_QUI");
+      }
+
+      async function readCloudDepositsSignature() {
+        if (!hasSupabaseConfig()) return null;
+
+        const baseUrl = String(SALVADANAIO_SYNC.supabaseUrl).replace(/\/$/, "");
+        const spaceId = SALVADANAIO_SYNC.spaceId || "gabri-rossi-vacanza";
+        const url = `${baseUrl}/rest/v1/depositi?space_id=eq.${encodeURIComponent(spaceId)}&select=id,persona,amount,importo,date,data,created_at,updated_at&order=created_at.asc`;
+
+        const response = await fetch(url, {
+          headers: {
+            apikey: SALVADANAIO_SYNC.supabaseAnonKey,
+            Authorization: `Bearer ${SALVADANAIO_SYNC.supabaseAnonKey}`,
+            Accept: "application/json",
+            "Cache-Control": "no-cache"
+          }
+        });
+
+        if (!response.ok) return null;
+        const rows = await response.json();
+        return JSON.stringify(rows || []);
+      }
+
+      async function watchCloudDeposits() {
+        try {
+          const signature = await readCloudDepositsSignature();
+          if (!signature) return;
+
+          const previous = sessionStorage.getItem(cloudStateKey);
+          sessionStorage.setItem(cloudStateKey, signature);
+
+          if (previous && previous !== signature) {
+            window.location.reload();
+          }
+        } catch {
+          // If the phone is offline or Supabase is unreachable, keep the app usable.
+        }
+      }
+
+      watchCloudDeposits();
+      window.addEventListener("focus", watchCloudDeposits);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) watchCloudDeposits();
+      });
+      setInterval(watchCloudDeposits, 12000);
+    })();
+  </script>
 </body>
 </html>
