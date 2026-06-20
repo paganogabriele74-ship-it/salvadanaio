@@ -4,6 +4,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#ffffff">
   <meta name="color-scheme" content="light">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <link rel="icon" type="image/png" href="assets/app-icon.png">
   <link rel="apple-touch-icon" href="assets/app-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1298,6 +1301,33 @@
       document.addEventListener("click", () => setTimeout(setupStatsSelectorIndicator, 80));
       setTimeout(setupStatsSelectorIndicator, 500);
       setTimeout(setupStatsSelectorIndicator, 1200);
+    })();
+  </script>
+  <script>
+    (() => {
+      const syncReloadKey = "travelVaultLastCloudRefresh";
+      const minRefreshDistance = 45000;
+
+      function refreshWhenReturningToApp() {
+        const now = Date.now();
+        const last = Number(sessionStorage.getItem(syncReloadKey) || "0");
+        if (now - last < minRefreshDistance) return;
+        sessionStorage.setItem(syncReloadKey, String(now));
+
+        if (typeof SALVADANAIO_SYNC !== "undefined" && SALVADANAIO_SYNC?.supabaseUrl && SALVADANAIO_SYNC?.supabaseAnonKey) {
+          window.location.reload();
+        }
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) {
+          setTimeout(refreshWhenReturningToApp, 400);
+        }
+      });
+
+      window.addEventListener("online", () => {
+        setTimeout(refreshWhenReturningToApp, 400);
+      });
     })();
   </script>
 </body>
