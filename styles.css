@@ -2556,6 +2556,136 @@ select:focus {
   text-shadow: none !important;
 }
 
+@media (min-width: 900px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .app-shell,
+  main,
+  .page-shell,
+  .screen,
+  .view,
+  .tab-panel {
+    width: 100%;
+  }
+
+  .hero,
+  .home-hero,
+  .hero-section,
+  .hero-media {
+    min-height: clamp(680px, 82vh, 860px) !important;
+    display: grid !important;
+    place-items: center !important;
+    overflow: hidden;
+  }
+
+  .hero-copy,
+  .hero-text,
+  .hero-message,
+  .hero-intro,
+  .hero-content {
+    position: absolute !important;
+    top: clamp(86px, 10vh, 118px) !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: min(900px, calc(100vw - 96px)) !important;
+    padding: 0 !important;
+    z-index: 4;
+  }
+
+  .hero-copy h1,
+  .hero-text h1,
+  .hero-message h1,
+  .hero-intro h1,
+  .hero-content h1 {
+    max-width: 900px !important;
+    font-size: clamp(3rem, 4.8vw, 5.9rem) !important;
+    line-height: .96 !important;
+    letter-spacing: 0 !important;
+    margin: 0 auto 18px !important;
+  }
+
+  .hero-copy p,
+  .hero-text p,
+  .hero-message p,
+  .hero-intro p,
+  .hero-content p {
+    max-width: 760px !important;
+    font-size: clamp(1.05rem, 1.25vw, 1.35rem) !important;
+    line-height: 1.45 !important;
+    margin: 0 auto !important;
+  }
+
+  .hero-total-center {
+    top: 58% !important;
+    width: clamp(500px, 34vw, 640px) !important;
+    height: clamp(500px, 34vw, 640px) !important;
+    padding: clamp(92px, 6.5vw, 126px) !important;
+  }
+
+  .hero-total-center span {
+    font-size: clamp(1.35rem, 1.25vw, 1.75rem) !important;
+    margin-bottom: 12px !important;
+  }
+
+  .hero-total-center strong,
+  #savedTotal {
+    font-size: clamp(4.3rem, 5.8vw, 7.4rem) !important;
+    line-height: .9 !important;
+    white-space: nowrap;
+  }
+
+  .progress-ring-svg {
+    inset: 10px !important;
+  }
+
+  .bottom-nav {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 24px !important;
+    transform: translateX(-50%) !important;
+    width: min(760px, calc(100vw - 64px)) !important;
+    max-width: 760px !important;
+    min-width: 0 !important;
+    border-radius: 28px !important;
+    padding: 12px 14px !important;
+  }
+
+  .bottom-nav-item {
+    min-height: 70px !important;
+    gap: 7px !important;
+  }
+
+  .bottom-nav-item strong {
+    font-size: .88rem !important;
+  }
+
+  .nav-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  .content,
+  .sections,
+  .dashboard-grid,
+  .deposit-layout,
+  .stats-layout,
+  .expenses-layout,
+  .settings-layout {
+    max-width: 1180px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
+  .content,
+  .sections {
+    padding-left: 32px !important;
+    padding-right: 32px !important;
+    padding-bottom: 128px !important;
+  }
+}
+
 .hero-total-center span.letters-jump i {
   animation: labelLetterJump .82s cubic-bezier(.22, 1.25, .32, 1) both;
   animation-delay: calc(var(--letter-index) * 42ms);
@@ -2752,6 +2882,10 @@ select:focus {
 
   .hero-total-center::before {
     padding: 15px;
+  }
+
+  .progress-ring-svg {
+    filter: drop-shadow(0 0 20px rgba(255, 214, 118, .48)) drop-shadow(0 12px 28px rgba(0, 18, 34, .24)) !important;
   }
 }
 

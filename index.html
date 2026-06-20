@@ -364,13 +364,27 @@
           <svg class="progress-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
             <defs>
               <linearGradient id="vaultRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#35d3c6" />
-                <stop offset="18%" stop-color="#b9f5c8" />
-                <stop offset="36%" stop-color="#ffd166" />
-                <stop offset="54%" stop-color="#ff6b6b" />
-                <stop offset="72%" stop-color="#ffd166" />
-                <stop offset="86%" stop-color="#b9f5c8" />
-                <stop offset="100%" stop-color="#35d3c6" />
+                <stop offset="0%" stop-color="#35d3c6">
+                  <animate attributeName="stop-color" values="#35d3c6;#ffd166;#ff6b6b;#b9f5c8;#35d3c6" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="18%" stop-color="#b9f5c8">
+                  <animate attributeName="stop-color" values="#b9f5c8;#35d3c6;#ffd166;#ff6b6b;#b9f5c8" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="36%" stop-color="#ffd166">
+                  <animate attributeName="stop-color" values="#ffd166;#ff6b6b;#b9f5c8;#35d3c6;#ffd166" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="54%" stop-color="#ff6b6b">
+                  <animate attributeName="stop-color" values="#ff6b6b;#b9f5c8;#35d3c6;#ffd166;#ff6b6b" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="72%" stop-color="#ffd166">
+                  <animate attributeName="stop-color" values="#ffd166;#35d3c6;#ff6b6b;#b9f5c8;#ffd166" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="86%" stop-color="#b9f5c8">
+                  <animate attributeName="stop-color" values="#b9f5c8;#ffd166;#35d3c6;#ff6b6b;#b9f5c8" dur="4.6s" repeatCount="indefinite" />
+                </stop>
+                <stop offset="100%" stop-color="#35d3c6">
+                  <animate attributeName="stop-color" values="#35d3c6;#ff6b6b;#ffd166;#b9f5c8;#35d3c6" dur="4.6s" repeatCount="indefinite" />
+                </stop>
                 <animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="4.6s" repeatCount="indefinite" />
               </linearGradient>
             </defs>
