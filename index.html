@@ -1051,7 +1051,7 @@
               <article class="editable-expense-row" data-expense-id="${item.id}">
                 <input class="expense-name-input" type="text" value="${String(item.name).replaceAll('"', "&quot;")}" aria-label="Nome spesa">
                 <span class="amount-euro-field">
-                  <input class="expense-amount-input" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(item.amount || 0)}" aria-label="Importo spesa">
+                  <input class="expense-amount-input" type="number" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" enterkeyhint="done" min="0" step="0.01" value="${Number(item.amount || 0)}" aria-label="Importo spesa">
                 </span>
                 <button class="expense-delete-button" type="button" aria-label="Elimina spesa">×</button>
                 <div class="editable-expense-details">
@@ -1064,7 +1064,7 @@
           <div class="editable-expenses-add">
             <input id="newExpenseName" type="text" placeholder="Nuova spesa" aria-label="Nuova spesa">
             <span class="amount-euro-field">
-              <input id="newExpenseAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" aria-label="Importo nuova spesa">
+              <input id="newExpenseAmount" type="number" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" autocomplete="off" enterkeyhint="done" min="0" step="0.01" placeholder="0,00" aria-label="Importo nuova spesa">
             </span>
             <button class="expense-add-button" type="button">+</button>
             <button class="expense-reset-button" type="button">Ripristina</button>
@@ -1462,6 +1462,192 @@
         const text = (event.target?.closest?.("button, a, .bottom-nav-item")?.textContent || "").toLowerCase();
         if (text.includes("impost")) setTimeout(checkCloudStatus, 500);
       });
+    })();
+  </script>
+  <script>
+    (() => {
+      const mediaBucket = "travel-vault-media";
+      const settingIds = {
+        header: "header_photo_url",
+        gabri: "gabri_photo_url",
+        rossi: "rossi_photo_url",
+        home: "home_background_url"
+      };
+      const localMediaKeys = {
+        header: "travelVaultHeaderPhoto",
+        gabri: "travelVaultGabriPhoto",
+        rossi: "travelVaultRossiPhoto",
+        home: "travelVaultHomeBackground"
+      };
+
+      function hasCloud() {
+        return typeof SALVADANAIO_SYNC !== "undefined"
+          && SALVADANAIO_SYNC?.supabaseUrl
+          && SALVADANAIO_SYNC?.supabaseAnonKey
+          && !String(SALVADANAIO_SYNC.supabaseUrl).includes("INCOLLA_QUI");
+      }
+
+      function cloudHeaders(extra = {}) {
+        return {
+          apikey: SALVADANAIO_SYNC.supabaseAnonKey,
+          Authorization: `Bearer ${SALVADANAIO_SYNC.supabaseAnonKey}`,
+          ...extra
+        };
+      }
+
+      function cloudBase() {
+        return String(SALVADANAIO_SYNC.supabaseUrl).replace(/\/$/, "");
+      }
+
+      async function saveSetting(id, value) {
+        const response = await fetch(`${cloudBase()}/rest/v1/app_settings`, {
+          method: "POST",
+          headers: cloudHeaders({
+            "Content-Type": "application/json",
+            Prefer: "resolution=merge-duplicates"
+          }),
+          body: JSON.stringify({ id, value, updated_at: new Date().toISOString() })
+        });
+        if (!response.ok) throw new Error("settings save failed");
+      }
+
+      async function readSettings() {
+        if (!hasCloud()) return {};
+        const ids = Object.values(settingIds).map((id) => `"${id}"`).join(",");
+        const response = await fetch(`${cloudBase()}/rest/v1/app_settings?id=in.(${ids})&select=id,value`, {
+          headers: cloudHeaders({ Accept: "application/json", "Cache-Control": "no-cache" })
+        });
+        if (!response.ok) return {};
+        const rows = await response.json();
+        return Object.fromEntries((rows || []).map((row) => [row.id, row.value]));
+      }
+
+      async function uploadMedia(kind, file) {
+        const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+        const path = `${kind}.${ext}`;
+        const response = await fetch(`${cloudBase()}/storage/v1/object/${mediaBucket}/${path}`, {
+          method: "POST",
+          headers: cloudHeaders({
+            "Content-Type": file.type || "image/jpeg",
+            "x-upsert": "true"
+          }),
+          body: file
+        });
+        if (!response.ok) throw new Error("upload failed");
+        return `${cloudBase()}/storage/v1/object/public/${mediaBucket}/${path}?v=${Date.now()}`;
+      }
+
+      function setPreview(kind, value) {
+        const preview = document.querySelector(`[data-media-preview="${kind}"]`);
+        if (!preview) return;
+        if (value) {
+          preview.style.backgroundImage = `url("${value}")`;
+          preview.textContent = "";
+        } else {
+          preview.style.backgroundImage = "";
+          preview.textContent = preview.dataset.fallback || "";
+        }
+      }
+
+      function applyHeader(value) {
+        document.querySelectorAll("*").forEach((element) => {
+          if ((element.textContent || "").trim() !== "GR" && !element.classList.contains("custom-photo-avatar")) return;
+          const box = element.getBoundingClientRect();
+          if (box.width < 28 || box.height < 28 || box.width > 190 || box.height > 190) return;
+          element.classList.toggle("custom-photo-avatar", Boolean(value));
+          element.style.backgroundImage = value ? `url("${value}")` : "";
+          if (!value) element.textContent = "GR";
+        });
+      }
+
+      function applyHome(value) {
+        const fallback = "url('assets/beach-sunset.png'), url('assets/beach-hero.svg')";
+        const bg = value ? `url("${value}")` : fallback;
+        document.documentElement.style.setProperty("--custom-home-bg", bg);
+        document.querySelectorAll(".hero, .home-hero, .hero-section, .hero-media").forEach((hero) => {
+          hero.classList.add("custom-home-background");
+          hero.style.setProperty("--custom-home-bg", bg);
+          hero.style.backgroundImage = `linear-gradient(180deg, rgba(9, 12, 22, .26), rgba(9, 12, 22, .30)), ${bg}`;
+          hero.style.backgroundSize = "cover";
+          hero.style.backgroundPosition = "center";
+        });
+      }
+
+      function applyPerson(kind, value) {
+        if (!value) {
+          document.querySelectorAll(`[data-person-photo="${kind}"]`).forEach((badge) => badge.remove());
+          return;
+        }
+        const names = kind === "gabri" ? ["gabri", "gabriele"] : ["rossi", "rossella"];
+        document.querySelectorAll(".card, .person-card, .metric-card, .summary-card, .deposit-card").forEach((card) => {
+          const scope = `${card.closest("section, .view, .screen, [data-view]")?.textContent || ""} ${card.closest("section, .view, .screen, [data-view]")?.className || ""}`.toLowerCase();
+          if (scope.includes("statistiche") || scope.includes("insieme")) return;
+          const text = (card.textContent || "").toLowerCase();
+          if (!names.some((name) => text.includes(name))) return;
+          let badge = card.querySelector(`[data-person-photo="${kind}"]`);
+          if (!badge) {
+            badge = document.createElement("span");
+            badge.className = "person-photo-badge";
+            badge.dataset.personPhoto = kind;
+            card.prepend(badge);
+          }
+          badge.style.backgroundImage = `url("${value}")`;
+        });
+      }
+
+      async function loadCloudMedia() {
+        const settings = await readSettings();
+        const values = {
+          header: settings[settingIds.header] || localStorage.getItem(localMediaKeys.header) || "",
+          gabri: settings[settingIds.gabri] || localStorage.getItem(localMediaKeys.gabri) || "",
+          rossi: settings[settingIds.rossi] || localStorage.getItem(localMediaKeys.rossi) || "",
+          home: settings[settingIds.home] || localStorage.getItem(localMediaKeys.home) || ""
+        };
+
+        Object.entries(values).forEach(([kind, value]) => {
+          if (value) localStorage.setItem(localMediaKeys[kind], value);
+          setPreview(kind, value);
+        });
+        applyHeader(values.header);
+        applyPerson("gabri", values.gabri);
+        applyPerson("rossi", values.rossi);
+        applyHome(values.home);
+      }
+
+      document.addEventListener("change", async (event) => {
+        const input = event.target?.closest?.("[data-media-input]");
+        if (!input || !hasCloud()) return;
+        const kind = input.dataset.mediaInput;
+        const file = input.files?.[0];
+        if (!kind || !file || !settingIds[kind]) return;
+
+        try {
+          const url = await uploadMedia(kind, file);
+          await saveSetting(settingIds[kind], url);
+          localStorage.setItem(localMediaKeys[kind], url);
+          await loadCloudMedia();
+        } catch {
+          alert("Foto non caricata sul cloud. Controlla le policy Storage di Supabase.");
+        }
+      }, true);
+
+      document.addEventListener("click", async (event) => {
+        const button = event.target?.closest?.("[data-media-reset]");
+        if (!button || !hasCloud()) return;
+        const kind = button.dataset.mediaReset;
+        if (!kind || !settingIds[kind]) return;
+        try {
+          await saveSetting(settingIds[kind], "");
+          localStorage.removeItem(localMediaKeys[kind]);
+          await loadCloudMedia();
+        } catch {
+          alert("Reset cloud non riuscito.");
+        }
+      }, true);
+
+      loadCloudMedia();
+      window.addEventListener("load", loadCloudMedia);
+      setInterval(loadCloudMedia, 15000);
     })();
   </script>
 </body>
