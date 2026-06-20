@@ -2556,6 +2556,21 @@ select:focus {
   text-shadow: none !important;
 }
 
+input,
+select,
+textarea,
+button {
+  font-size: 16px !important;
+}
+
+input[type="number"],
+input[type="text"],
+input[type="date"],
+textarea {
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
 @media (min-width: 900px) {
   body {
     overflow-x: hidden;
