@@ -2621,6 +2621,78 @@ select:focus {
 html,
 body {
   background: #fff !important;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+  overscroll-behavior-x: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+@media (max-width: 720px) {
+  html,
+  body {
+    position: relative;
+    overflow-x: hidden !important;
+    touch-action: pan-y;
+  }
+
+  .app-shell,
+  main,
+  .view,
+  .screen,
+  .tab-panel,
+  section,
+  .settings-media-panel,
+  .editable-expenses-panel,
+  .bottom-nav {
+    max-width: 100vw !important;
+  }
+
+  body {
+    left: 0 !important;
+    right: 0 !important;
+  }
+
+  .app-shell,
+  main,
+  .view,
+  .screen,
+  .tab-panel {
+    width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: clip !important;
+  }
+
+  .bottom-nav {
+    position: fixed !important;
+    left: max(12px, env(safe-area-inset-left)) !important;
+    right: max(12px, env(safe-area-inset-right)) !important;
+    width: auto !important;
+    max-width: calc(100vw - 24px) !important;
+    min-width: 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
+  }
+
+  .bottom-nav-item {
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .bottom-nav-item strong {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  video,
+  canvas,
+  svg {
+    max-width: 100% !important;
+  }
 }
 
 @supports (padding: env(safe-area-inset-top)) {
@@ -3101,7 +3173,7 @@ body::before {
 }
 
 .settings-media-panel {
-  width: min(100%, 980px);
+  width: min(100% - 28px, 760px) !important;
   margin: 20px auto 120px;
   padding: 18px;
   border-radius: 28px;
@@ -3260,6 +3332,155 @@ body.settings-tab-active .settings-media-panel {
   background: linear-gradient(135deg, #ff6b6b, #c93636);
 }
 
+.crop-editor {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 8, 13, .72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.crop-editor.is-open {
+  display: grid;
+}
+
+.crop-editor-card {
+  width: min(94vw, 430px);
+  padding: 16px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .34);
+}
+
+.crop-editor-card h2 {
+  margin: 0 0 12px;
+  color: #101820;
+  font-size: 1.35rem;
+}
+
+.crop-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #101820;
+  touch-action: none;
+}
+
+.crop-stage.is-wide {
+  aspect-ratio: 16 / 10;
+}
+
+.crop-stage img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  max-width: none;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform-origin: center;
+  object-fit: contain;
+}
+
+.crop-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, .86);
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 999px rgba(0, 0, 0, .10);
+  pointer-events: none;
+}
+
+.crop-hint {
+  margin: 10px 0 0;
+  color: rgba(15, 23, 42, .68);
+  font-size: .9rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.crop-controls {
+  display: grid;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+.crop-controls label {
+  display: grid;
+  gap: 7px;
+  color: rgba(15, 23, 42, .72);
+  font-weight: 900;
+  font-size: .9rem;
+}
+
+.crop-controls input[type="range"] {
+  width: 100%;
+  accent-color: #35d3c6;
+}
+
+.crop-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.crop-actions button {
+  border: 0;
+  min-height: 46px;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.crop-cancel {
+  color: #25313b;
+  background: rgba(15, 23, 42, .08);
+}
+
+.crop-save {
+  color: #fff;
+  background: linear-gradient(135deg, #101820, #2f3b45);
+}
+
+/* Restore home deposit cards after experimental photo layout changes. */
+.home-person-photo,
+[data-home-person-photo] {
+  display: none !important;
+}
+
+.home-person-photo-card,
+.card.home-person-photo-card,
+.metric-card.home-person-photo-card,
+.summary-card.home-person-photo-card,
+.person-card.home-person-photo-card {
+  display: revert !important;
+  min-height: revert !important;
+  height: auto !important;
+  gap: revert !important;
+  align-items: revert !important;
+}
+
+.home-person-photo-card .custom-person-letter-photo,
+.card .custom-person-letter-photo,
+.metric-card .custom-person-letter-photo,
+.summary-card .custom-person-letter-photo,
+.person-card .custom-person-letter-photo {
+  width: revert !important;
+  height: revert !important;
+  min-width: revert !important;
+  min-height: revert !important;
+  flex-basis: revert !important;
+  border-radius: revert !important;
+}
+
 .custom-photo-avatar {
   background-size: cover !important;
   background-position: center !important;
@@ -3300,6 +3521,131 @@ body.settings-tab-active .settings-media-panel {
 [data-view="statistics"] .person-photo-badge,
 [data-view="statistiche"] .person-photo-badge {
   display: none !important;
+}
+
+.hero .person-photo-badge,
+.home-hero .person-photo-badge,
+.hero-section .person-photo-badge,
+.hero-media .person-photo-badge,
+.hero-total-center .person-photo-badge {
+  display: none !important;
+}
+
+.custom-person-letter-photo {
+  background-size: cover !important;
+  background-position: center !important;
+  color: transparent !important;
+  text-shadow: none !important;
+  overflow: hidden !important;
+}
+
+body .person-photo-badge {
+  display: none !important;
+}
+
+.settings-media-panel .person-photo-badge {
+  display: initial !important;
+}
+
+.home-person-photo {
+  flex: 0 0 auto;
+  width: clamp(150px, 38vw, 230px);
+  height: clamp(150px, 38vw, 230px);
+  border-radius: 32px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, .18);
+  border: 1px solid rgba(255, 255, 255, .72);
+}
+
+.home-person-photo-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.home-person-photo-card > :not(.home-person-photo) {
+  min-width: 0;
+}
+
+@media (max-width: 520px) {
+  .home-person-photo {
+    width: 145px;
+    height: 145px;
+    border-radius: 28px;
+  }
+
+  .home-person-photo-card {
+    gap: 12px !important;
+  }
+}
+
+.home [data-home-person-photo],
+#home [data-home-person-photo],
+[data-view="home"] [data-home-person-photo],
+.hero [data-home-person-photo],
+.home-hero [data-home-person-photo],
+.hero-section [data-home-person-photo],
+.hero-media [data-home-person-photo],
+span.home-person-photo {
+  display: block !important;
+  flex: 0 0 clamp(170px, 42vw, 260px) !important;
+  width: clamp(170px, 42vw, 260px) !important;
+  height: clamp(170px, 42vw, 260px) !important;
+  min-width: clamp(170px, 42vw, 260px) !important;
+  min-height: clamp(170px, 42vw, 260px) !important;
+  border-radius: 34px !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+@media (max-width: 520px) {
+  .home [data-home-person-photo],
+  #home [data-home-person-photo],
+  [data-view="home"] [data-home-person-photo],
+  .hero [data-home-person-photo],
+  .home-hero [data-home-person-photo],
+  .hero-section [data-home-person-photo],
+  .hero-media [data-home-person-photo],
+  span.home-person-photo {
+    flex-basis: 165px !important;
+    width: 165px !important;
+    height: 165px !important;
+    min-width: 165px !important;
+    min-height: 165px !important;
+    border-radius: 30px !important;
+  }
+
+}
+
+.home-person-photo-card .custom-person-letter-photo,
+.card .custom-person-letter-photo,
+.metric-card .custom-person-letter-photo,
+.summary-card .custom-person-letter-photo,
+.person-card .custom-person-letter-photo {
+  flex: 0 0 clamp(170px, 42vw, 260px) !important;
+  width: clamp(170px, 42vw, 260px) !important;
+  height: clamp(170px, 42vw, 260px) !important;
+  min-width: clamp(170px, 42vw, 260px) !important;
+  min-height: clamp(170px, 42vw, 260px) !important;
+  border-radius: 34px !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+@media (max-width: 520px) {
+  .home-person-photo-card .custom-person-letter-photo,
+  .card .custom-person-letter-photo,
+  .metric-card .custom-person-letter-photo,
+  .summary-card .custom-person-letter-photo,
+  .person-card .custom-person-letter-photo {
+    flex-basis: 170px !important;
+    width: 170px !important;
+    height: 170px !important;
+    min-width: 170px !important;
+    min-height: 170px !important;
+    border-radius: 30px !important;
+  }
 }
 
 .stats-switch,
@@ -3344,7 +3690,9 @@ body.settings-tab-active .settings-media-panel {
 
 @media (max-width: 720px) {
   .settings-media-panel {
-    margin: 14px 14px 104px;
+    width: calc(100vw - 28px) !important;
+    max-width: 760px !important;
+    margin: 14px auto 104px !important;
     padding: 14px;
     border-radius: 24px;
   }
@@ -3650,20 +3998,11 @@ body.settings-tab-active .settings-media-panel {
 }
 
 .editable-expense-details {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: -2px;
+  display: none !important;
 }
 
 .editable-expense-details span {
-  padding: 5px 8px;
-  border-radius: 999px;
-  color: rgba(15, 23, 42, .68);
-  background: rgba(15, 23, 42, .055);
-  font-size: .76rem;
-  font-weight: 800;
+  display: none !important;
 }
 
 @media (max-width: 720px) {
