@@ -1244,5 +1244,61 @@
       setTimeout(fixStatsInitialTab, 500);
     })();
   </script>
+  <script>
+    (() => {
+      function setupStatsSelectorIndicator() {
+        const groups = [...document.querySelectorAll("div, nav, section")].filter((group) => {
+          const labels = [...group.querySelectorAll("button, [role='tab'], [data-stats-person], [data-person]")]
+            .map((button) => (button.textContent || "").trim().toLowerCase());
+          return labels.includes("gabri") && labels.includes("rossi") && labels.includes("insieme");
+        });
+
+        const group = groups.sort((a, b) => a.querySelectorAll("*").length - b.querySelectorAll("*").length)[0];
+        if (!group) return;
+
+        group.classList.add("stats-force-switch");
+
+        let indicator = group.querySelector(".stats-force-indicator");
+        if (!indicator) {
+          indicator = document.createElement("span");
+          indicator.className = "stats-force-indicator";
+          indicator.setAttribute("aria-hidden", "true");
+          group.prepend(indicator);
+        }
+
+        const buttons = [...group.querySelectorAll("button, [role='tab'], [data-stats-person], [data-person]")]
+          .filter((button) => ["gabri", "rossi", "insieme"].includes((button.textContent || "").trim().toLowerCase()));
+
+        function moveIndicator(target) {
+          if (!target) return;
+          buttons.forEach((button) => {
+            const active = button === target;
+            button.classList.toggle("active", active);
+            button.classList.toggle("is-active", active);
+            button.style.color = active ? "#fff" : "rgba(16, 24, 32, .72)";
+          });
+          indicator.style.width = `${target.offsetWidth}px`;
+          indicator.style.transform = `translateX(${target.offsetLeft}px)`;
+        }
+
+        const active = buttons.find((button) => button.classList.contains("active") || button.classList.contains("is-active") || button.getAttribute("aria-selected") === "true");
+        moveIndicator(active || buttons[0]);
+
+        buttons.forEach((button) => {
+          if (button.dataset.statsIndicatorBound === "true") return;
+          button.dataset.statsIndicatorBound = "true";
+          button.addEventListener("click", () => {
+            setTimeout(() => moveIndicator(button), 30);
+          });
+        });
+      }
+
+      setupStatsSelectorIndicator();
+      window.addEventListener("load", setupStatsSelectorIndicator);
+      document.addEventListener("click", () => setTimeout(setupStatsSelectorIndicator, 80));
+      setTimeout(setupStatsSelectorIndicator, 500);
+      setTimeout(setupStatsSelectorIndicator, 1200);
+    })();
+  </script>
 </body>
 </html>

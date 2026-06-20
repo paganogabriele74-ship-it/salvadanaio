@@ -3271,6 +3271,33 @@ body.settings-tab-active .settings-media-panel {
   color: #fff;
 }
 
+.stats-force-switch {
+  position: relative !important;
+  isolation: isolate;
+}
+
+.stats-force-switch button,
+.stats-force-switch [role="tab"],
+.stats-force-switch [data-stats-person],
+.stats-force-switch [data-person] {
+  position: relative;
+  z-index: 2;
+  transition: color .25s ease, transform .25s ease;
+}
+
+.stats-force-switch .stats-force-indicator {
+  position: absolute;
+  z-index: 1;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  border-radius: 999px;
+  background: #101820;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .22);
+  transition: transform .34s cubic-bezier(.2, .9, .2, 1), width .34s cubic-bezier(.2, .9, .2, 1);
+  pointer-events: none;
+}
+
 @media (max-width: 720px) {
   .settings-media-panel {
     margin: 14px 14px 104px;
