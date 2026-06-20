@@ -86,6 +86,13 @@ let deposits = JSON.parse(localStorage.getItem(storageKey) || "[]");
 deposits = deposits.map((item, index) => item.id ? item : { ...item, id: `old-${index}-${item.date || Date.now()}` });
 localStorage.setItem(storageKey, JSON.stringify(deposits));
 let editingDepositId = null;
+const syncConfig = typeof SALVADANAIO_SYNC !== "undefined" ? SALVADANAIO_SYNC : {};
+const directSupabaseEnabled =
+  syncConfig.supabaseUrl &&
+  syncConfig.supabaseAnonKey &&
+  !syncConfig.supabaseUrl.includes("INCOLLA_QUI") &&
+  !syncConfig.supabaseAnonKey.includes("INCOLLA_QUI");
+const cloudSyncEnabled = location.protocol.startsWith("http") || directSupabaseEnabled;
 
 const dailyMotivations = [
   "Ogni giorno che passa siete piu vicini alla partenza.",
@@ -426,11 +433,121 @@ function rotateHeroQuote() {
   }, 260);
 }
 
-function saveDeposit(event) {
+async function loadCloudDeposits() {
+  if (!cloudSyncEnabled) return;
+  try {
+    if (directSupabaseEnabled) {
+      const response = await supabaseRequest(
+        `depositi?space_id=eq.${encodeURIComponent(syncConfig.spaceId)}&select=id,person,amount,note,date,created_at&order=created_at.asc`
+      );
+      deposits = response.map((item) => ({
+        id: item.id,
+        person: item.person,
+        amount: Number(item.amount),
+        note: item.note || "",
+        date: item.date || ""
+      }));
+      localStorage.setItem(storageKey, JSON.stringify(deposits));
+      renderAll();
+      return;
+    }
+
+    const response = await fetch("/api/depositi");
+    if (!response.ok) return;
+    const cloudDeposits = await response.json();
+    deposits = cloudDeposits.map((item) => ({
+      id: item.id,
+      person: item.person,
+      amount: Number(item.amount),
+      note: item.note || "",
+      date: item.date || ""
+    }));
+    localStorage.setItem(storageKey, JSON.stringify(deposits));
+    renderAll();
+  } catch {
+    // Se il cloud non risponde, l'app resta utilizzabile col salvataggio locale.
+  }
+}
+
+async function saveCloudDeposit(deposit, method = "POST") {
+  if (!cloudSyncEnabled) return;
+  try {
+    if (directSupabaseEnabled) {
+      const payload = {
+        id: deposit.id,
+        space_id: syncConfig.spaceId,
+        person: deposit.person,
+        amount: Number(deposit.amount),
+        note: deposit.note || "",
+        date: deposit.date || ""
+      };
+      if (method === "PUT") {
+        await supabaseRequest(
+          `depositi?id=eq.${encodeURIComponent(deposit.id)}&space_id=eq.${encodeURIComponent(syncConfig.spaceId)}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify(payload)
+          }
+        );
+      } else {
+        await supabaseRequest("depositi", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+      }
+      return;
+    }
+
+    await fetch("/api/depositi", {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(deposit)
+    });
+  } catch {
+    // Fallback locale: non blocchiamo il deposito se la rete non va.
+  }
+}
+
+async function deleteCloudDeposit(id) {
+  if (!cloudSyncEnabled) return;
+  try {
+    if (directSupabaseEnabled) {
+      await supabaseRequest(
+        `depositi?id=eq.${encodeURIComponent(id)}&space_id=eq.${encodeURIComponent(syncConfig.spaceId)}`,
+        { method: "DELETE" }
+      );
+      return;
+    }
+
+    await fetch(`/api/depositi?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+  } catch {
+    // Fallback locale.
+  }
+}
+
+async function supabaseRequest(path, options = {}) {
+  const response = await fetch(`${syncConfig.supabaseUrl}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: syncConfig.supabaseAnonKey,
+      Authorization: `Bearer ${syncConfig.supabaseAnonKey}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) throw new Error("Errore sincronizzazione Supabase");
+  const text = await response.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function saveDeposit(event) {
   event.preventDefault();
   const amount = Number(String(elements.amount.value).replace(",", "."));
   if (!amount || amount <= 0) return;
   elements.form.classList.add("is-saving");
+  let cloudDeposit = null;
+  let cloudMethod = "POST";
   if (editingDepositId) {
     deposits = deposits.map((item) => item.id === editingDepositId ? {
       ...item,
@@ -438,16 +555,20 @@ function saveDeposit(event) {
       amount,
       note: elements.note.value.trim()
     } : item);
+    cloudDeposit = deposits.find((item) => item.id === editingDepositId);
+    cloudMethod = "PUT";
   } else {
-    deposits.push({
+    cloudDeposit = {
       id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
       person: elements.person.value,
       amount,
       note: elements.note.value.trim(),
       date: new Intl.DateTimeFormat("it-IT", { day: "2-digit", month: "short" }).format(new Date())
-    });
+    };
+    deposits.push(cloudDeposit);
   }
   localStorage.setItem(storageKey, JSON.stringify(deposits));
+  await saveCloudDeposit(cloudDeposit, cloudMethod);
   setTimeout(() => {
     elements.form.reset();
     elements.form.classList.remove("is-saving");
@@ -572,19 +693,22 @@ function stopEditDeposit() {
   elements.cancelEditButton.classList.add("is-hidden");
 }
 
-function deleteDeposit(id) {
+async function deleteDeposit(id) {
   deposits = deposits.filter((item) => item.id !== id);
   if (editingDepositId === id) {
     elements.form.reset();
     stopEditDeposit();
   }
   localStorage.setItem(storageKey, JSON.stringify(deposits));
+  await deleteCloudDeposit(id);
   renderAll();
 }
 
-function resetDeposits() {
+async function resetDeposits() {
+  const ids = deposits.map((item) => item.id);
   deposits = [];
   localStorage.removeItem(storageKey);
+  await Promise.all(ids.map((id) => deleteCloudDeposit(id)));
   renderAll();
 }
 
@@ -737,6 +861,8 @@ function showExpenses() {
 }
 
 renderAll();
+loadCloudDeposits();
+if (cloudSyncEnabled) setInterval(loadCloudDeposits, 12000);
 drawSparkles();
 setInterval(rotateHeroQuote, 30000);
 window.addEventListener("resize", moveStatsIndicator);
