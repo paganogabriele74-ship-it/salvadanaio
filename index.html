@@ -48,7 +48,7 @@
 
       <section class="hero home-view">
         <div class="hero-media">
-          <img src="assets/beach-hero.svg" alt="Vacanza al mare" />
+          <img src="assets/beach-sunset.png" alt="Spiaggia realistica al tramonto" />
         </div>
 
         <div class="hero-shade"></div>
@@ -59,25 +59,25 @@
             <p id="dailyMotivation">Ogni giorno che passa siete piu vicini alla partenza.</p>
           </section>
 
+          <section class="hero-total-center" aria-label="Totale raccolto">
+            <span>Nel salvadanaio</span>
+            <strong id="savedTotal">EUR 0</strong>
+          </section>
+
           <section class="vault-card" aria-label="Riepilogo salvadanaio">
-            <div class="vault-total">
-              <span>Gia nel salvadanaio</span>
-              <strong id="savedTotal">EUR 0</strong>
-            </div>
-
-            <div class="progress-track">
-              <div id="progressFill" class="progress-fill"></div>
-            </div>
-
             <div class="vault-metrics">
               <div>
-                <span>Completato</span>
+                <span>Progresso</span>
                 <strong id="progressPercent">0%</strong>
               </div>
               <div class="right">
                 <span>Mancano</span>
                 <strong id="remainingTotal">EUR 0</strong>
               </div>
+            </div>
+
+            <div class="progress-track smart-track">
+              <div id="progressFill" class="progress-fill"></div>
             </div>
           </section>
         </div>
@@ -210,6 +210,21 @@
         </article>
       </section>
 
+      <section id="settingsView" class="page-view settings-view is-hidden">
+        <article class="panel settings-panel">
+          <div class="section-title">
+            <span>App</span>
+            <strong>Impostazioni</strong>
+          </div>
+          <p class="view-intro">Qui aggiungeremo le opzioni dell'app.</p>
+          <div class="settings-empty">
+            <span>⚙</span>
+            <strong>Pronta per le prossime modifiche</strong>
+            <em>Da qui potremo gestire preferenze, obiettivi e dettagli del salvadanaio.</em>
+          </div>
+        </article>
+      </section>
+
       <nav class="bottom-nav" aria-label="Navigazione principale">
         <button id="homeMenuItem" class="bottom-nav-item is-active" type="button">
           <span class="nav-icon">⌂</span>
@@ -220,17 +235,183 @@
           <strong>Deposita</strong>
         </button>
         <button id="statsMenuItem" class="bottom-nav-item" type="button">
-          <span class="nav-icon">◷</span>
+          <span class="nav-icon">▥</span>
           <strong>Statistiche</strong>
         </button>
         <button id="expensesMenuItem" class="bottom-nav-item" type="button">
           <span class="nav-icon">€</span>
           <strong>Spese</strong>
         </button>
+        <button id="settingsMenuItem" class="bottom-nav-item" type="button">
+          <span class="nav-icon">⚙</span>
+          <strong>Impostazioni</strong>
+        </button>
       </nav>
     </main>
 
     <script src="sync-config.js"></script>
     <script src="app.js"></script>
-  </body>
+  <script>
+    (() => {
+      const total = document.querySelector("#savedTotal");
+      if (!total) return;
+      const totalLabel = total.closest(".hero-total-center")?.querySelector("span");
+
+      if (totalLabel && !totalLabel.dataset.animatedLetters) {
+        totalLabel.dataset.animatedLetters = "true";
+        totalLabel.setAttribute("aria-label", totalLabel.textContent.trim());
+        totalLabel.innerHTML = totalLabel.textContent
+          .split("")
+          .map((letter, index) => `<i style="--letter-index:${index}">${letter === " " ? "&nbsp;" : letter}</i>`)
+          .join("");
+
+        setInterval(() => {
+          totalLabel.classList.remove("letters-jump");
+          void totalLabel.offsetWidth;
+          totalLabel.classList.add("letters-jump");
+        }, 10000);
+      }
+
+      let start = null;
+      const duration = 4600;
+
+      function moveTotalGradient(time) {
+        if (!start) start = time;
+        const elapsed = time - start;
+        const progress = Math.min(1, elapsed / duration);
+        const wave = (1 - Math.cos(progress * Math.PI * 2)) / 2;
+        const position = -35 + progress * 130;
+        const glow = 6 + wave * 7;
+
+        total.style.backgroundSize = "320% 100%";
+        total.style.backgroundPosition = `${position}% 50%`;
+        total.style.filter = `drop-shadow(0 0 ${glow}px rgba(255, 232, 160, .48)) drop-shadow(0 9px 20px rgba(0, 20, 38, .20))`;
+        total.style.transform = "translateY(0) scale(1)";
+        if (elapsed < duration) {
+          requestAnimationFrame(moveTotalGradient);
+        } else {
+          total.style.backgroundPosition = "50% 50%";
+          total.style.filter = "drop-shadow(0 0 8px rgba(255, 232, 160, .42)) drop-shadow(0 9px 20px rgba(0, 20, 38, .20))";
+        }
+      }
+
+      requestAnimationFrame(moveTotalGradient);
+
+      const digitPool = "0123456789";
+      let revealRunning = false;
+      let revealTarget = total.textContent;
+      let lastRevealedTotal = "";
+
+      function buildGlitchNumber(finalText, progress) {
+        let digitSeen = 0;
+        const digitCount = (finalText.match(/\d/g) || []).length || 1;
+
+        return finalText.replace(/\d/g, (digit) => {
+          digitSeen += 1;
+          const revealAt = digitSeen / digitCount * .78;
+          if (progress >= revealAt) return digit;
+          const eased = 1 - Math.pow(1 - progress, 2.2);
+          const softStep = Math.floor(eased * 52 + digitSeen * 4);
+          return digitPool[softStep % digitPool.length];
+        });
+      }
+
+      function revealTotalNumber(finalText) {
+        revealTarget = finalText;
+        if (revealRunning || !finalText.trim() || finalText === lastRevealedTotal) return;
+
+        revealRunning = true;
+        const startedAt = performance.now();
+        const revealDuration = 4000;
+
+        function tick(now) {
+          const progress = Math.min(1, (now - startedAt) / revealDuration);
+          total.textContent = buildGlitchNumber(revealTarget, progress);
+
+          if (progress < 1) {
+            requestAnimationFrame(tick);
+          } else {
+            total.textContent = revealTarget;
+            lastRevealedTotal = revealTarget;
+            revealRunning = false;
+          }
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      revealTotalNumber(total.textContent);
+
+      new MutationObserver(() => {
+        if (revealRunning) return;
+        revealTotalNumber(total.textContent);
+      }).observe(total, {
+        childList: true,
+        characterData: true,
+        subtree: true
+      });
+
+      const totalCircle = document.querySelector(".hero-total-center");
+      const progressText = document.querySelector("#progressPercent");
+      let progressRing = null;
+
+      function ensureProgressRing() {
+        if (!totalCircle) return null;
+        progressRing = totalCircle.querySelector(".ring-progress");
+        if (progressRing) return progressRing;
+
+        totalCircle.insertAdjacentHTML("afterbegin", `
+          <svg class="progress-ring-svg" viewBox="0 0 100 100" aria-hidden="true">
+            <defs>
+              <linearGradient id="vaultRingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#35d3c6" />
+                <stop offset="18%" stop-color="#b9f5c8" />
+                <stop offset="36%" stop-color="#ffd166" />
+                <stop offset="54%" stop-color="#ff6b6b" />
+                <stop offset="72%" stop-color="#ffd166" />
+                <stop offset="86%" stop-color="#b9f5c8" />
+                <stop offset="100%" stop-color="#35d3c6" />
+                <animateTransform attributeName="gradientTransform" type="rotate" from="0 .5 .5" to="360 .5 .5" dur="4.6s" repeatCount="indefinite" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="4.8" />
+            <circle class="ring-progress" cx="50" cy="50" r="46" pathLength="100" fill="none" stroke="url(#vaultRingGradient)" stroke-width="4.8" stroke-linecap="round" stroke-dasharray="0 100" transform="rotate(-90 50 50)" />
+          </svg>
+        `);
+
+        return totalCircle.querySelector(".ring-progress");
+      }
+
+      function syncTotalCircleProgress() {
+        if (!totalCircle || !progressText) return;
+        const value = Number(progressText.textContent.replace("%", "").replace(",", "."));
+        if (Number.isNaN(value)) return;
+        const angle = Math.max(0, Math.min(100, value)) * 3.6;
+        totalCircle.style.setProperty("--progress-angle", `${angle}deg`);
+        if (!totalCircle.querySelector(".ring-cap-start")) {
+          totalCircle.insertAdjacentHTML("beforeend", `
+            <span class="ring-cap ring-cap-start" style="--cap-angle:0deg;--cap-color:var(--teal)" aria-hidden="true"></span>
+            <span class="ring-cap ring-cap-end" aria-hidden="true"></span>
+          `);
+        }
+        const endCap = totalCircle.querySelector(".ring-cap-end");
+        if (endCap) {
+          endCap.style.setProperty("--cap-angle", `${angle}deg`);
+          endCap.style.setProperty("--cap-color", "var(--teal)");
+        }
+        const ring = ensureProgressRing();
+        if (ring) ring.setAttribute("stroke-dasharray", `${Math.max(0, Math.min(100, value)).toFixed(2)} 100`);
+      }
+
+      syncTotalCircleProgress();
+      if (progressText) {
+        new MutationObserver(syncTotalCircleProgress).observe(progressText, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+      }
+    })();
+  </script>
+</body>
 </html>

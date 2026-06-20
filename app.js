@@ -61,10 +61,12 @@ const elements = {
   depositMenuItem: document.querySelector("#depositMenuItem"),
   statsMenuItem: document.querySelector("#statsMenuItem"),
   expensesMenuItem: document.querySelector("#expensesMenuItem"),
+  settingsMenuItem: document.querySelector("#settingsMenuItem"),
   homeViews: document.querySelectorAll(".home-view"),
   depositView: document.querySelector("#depositView"),
   statsView: document.querySelector("#statsView"),
   expensesView: document.querySelector("#expensesView"),
+  settingsView: document.querySelector("#settingsView"),
   statsContent: document.querySelector("#statsContent"),
   statsSwitchIndicator: document.querySelector("#statsSwitchIndicator"),
   statsTabs: document.querySelectorAll(".stats-tab"),
@@ -197,6 +199,7 @@ function renderStats() {
   elements.monthlyPace.textContent = `${money(totals.remaining / emptyMonths)} / mese`;
   elements.progressPercent.textContent = `${percentFormatter.format(totals.progress)}%`;
   elements.progressFill.style.width = `${totals.progress}%`;
+  elements.progressFill.parentElement.style.setProperty("--marker", `${Math.min(Math.max(totals.progress, 3), 97)}%`);
 }
 
 function renderMonths() {
@@ -786,6 +789,7 @@ elements.homeMenuItem.addEventListener("click", showHome);
 elements.depositMenuItem.addEventListener("click", showDeposit);
 elements.statsMenuItem.addEventListener("click", showStats);
 elements.expensesMenuItem.addEventListener("click", showExpenses);
+elements.settingsMenuItem.addEventListener("click", showSettings);
 elements.statsTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     if (activeStatsMode === tab.dataset.stat) return;
@@ -817,10 +821,12 @@ function showHome() {
   elements.depositView.classList.add("is-hidden");
   elements.statsView.classList.add("is-hidden");
   elements.expensesView.classList.add("is-hidden");
+  elements.settingsView.classList.add("is-hidden");
   elements.homeMenuItem.classList.add("is-active");
   elements.depositMenuItem.classList.remove("is-active");
   elements.statsMenuItem.classList.remove("is-active");
   elements.expensesMenuItem.classList.remove("is-active");
+  elements.settingsMenuItem.classList.remove("is-active");
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -829,10 +835,12 @@ function showDeposit() {
   elements.depositView.classList.remove("is-hidden");
   elements.statsView.classList.add("is-hidden");
   elements.expensesView.classList.add("is-hidden");
+  elements.settingsView.classList.add("is-hidden");
   elements.homeMenuItem.classList.remove("is-active");
   elements.depositMenuItem.classList.add("is-active");
   elements.statsMenuItem.classList.remove("is-active");
   elements.expensesMenuItem.classList.remove("is-active");
+  elements.settingsMenuItem.classList.remove("is-active");
   elements.depositView.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -841,10 +849,12 @@ function showStats() {
   elements.depositView.classList.add("is-hidden");
   elements.statsView.classList.remove("is-hidden");
   elements.expensesView.classList.add("is-hidden");
+  elements.settingsView.classList.add("is-hidden");
   elements.homeMenuItem.classList.remove("is-active");
   elements.depositMenuItem.classList.remove("is-active");
   elements.statsMenuItem.classList.add("is-active");
   elements.expensesMenuItem.classList.remove("is-active");
+  elements.settingsMenuItem.classList.remove("is-active");
   elements.statsView.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -853,11 +863,27 @@ function showExpenses() {
   elements.depositView.classList.add("is-hidden");
   elements.statsView.classList.add("is-hidden");
   elements.expensesView.classList.remove("is-hidden");
+  elements.settingsView.classList.add("is-hidden");
   elements.homeMenuItem.classList.remove("is-active");
   elements.depositMenuItem.classList.remove("is-active");
   elements.statsMenuItem.classList.remove("is-active");
   elements.expensesMenuItem.classList.add("is-active");
+  elements.settingsMenuItem.classList.remove("is-active");
   elements.expensesView.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function showSettings() {
+  elements.homeViews.forEach((view) => view.classList.add("is-hidden"));
+  elements.depositView.classList.add("is-hidden");
+  elements.statsView.classList.add("is-hidden");
+  elements.expensesView.classList.add("is-hidden");
+  elements.settingsView.classList.remove("is-hidden");
+  elements.homeMenuItem.classList.remove("is-active");
+  elements.depositMenuItem.classList.remove("is-active");
+  elements.statsMenuItem.classList.remove("is-active");
+  elements.expensesMenuItem.classList.remove("is-active");
+  elements.settingsMenuItem.classList.add("is-active");
+  elements.settingsView.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 renderAll();
