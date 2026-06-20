@@ -3216,6 +3216,50 @@ body.settings-tab-active .settings-media-panel {
   pointer-events: none;
 }
 
+.sync-status-card {
+  margin: 0 0 14px;
+  padding: 13px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: rgba(15, 23, 42, .06);
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.sync-status-card strong {
+  display: block;
+  color: #101820;
+  font-size: .98rem;
+}
+
+.sync-status-card span {
+  display: block;
+  margin-top: 2px;
+  color: rgba(15, 23, 42, .62);
+  font-size: .86rem;
+  font-weight: 700;
+}
+
+.sync-status-pill {
+  flex: 0 0 auto;
+  padding: 8px 11px;
+  border-radius: 999px;
+  color: #fff;
+  background: #9aa4ad;
+  font-size: .78rem;
+  font-weight: 900;
+}
+
+.sync-status-card.is-ok .sync-status-pill {
+  background: linear-gradient(135deg, #25b89d, #35d3c6);
+}
+
+.sync-status-card.is-bad .sync-status-pill {
+  background: linear-gradient(135deg, #ff6b6b, #c93636);
+}
+
 .custom-photo-avatar {
   background-size: cover !important;
   background-position: center !important;

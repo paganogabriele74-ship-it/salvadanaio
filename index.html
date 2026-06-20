@@ -1387,5 +1387,82 @@
       setInterval(watchCloudDeposits, 12000);
     })();
   </script>
+  <script>
+    (() => {
+      function getSettingsRoot() {
+        return document.querySelector(".settings-media-panel") || document.querySelector("[data-view='settings'], [data-view='impostazioni'], #settings, #impostazioni") || document.body;
+      }
+
+      function hasRealSyncConfig() {
+        return typeof SALVADANAIO_SYNC !== "undefined"
+          && SALVADANAIO_SYNC?.supabaseUrl
+          && SALVADANAIO_SYNC?.supabaseAnonKey
+          && !String(SALVADANAIO_SYNC.supabaseUrl).includes("INCOLLA_QUI")
+          && !String(SALVADANAIO_SYNC.supabaseAnonKey).includes("INCOLLA_QUI");
+      }
+
+      function renderSyncStatus(state, detail) {
+        const root = getSettingsRoot();
+        if (!root) return;
+
+        let card = document.querySelector(".sync-status-card");
+        if (!card) {
+          card = document.createElement("section");
+          card.className = "sync-status-card";
+          card.innerHTML = `
+            <div>
+              <strong>Sincronizzazione cloud</strong>
+              <span></span>
+            </div>
+            <em class="sync-status-pill"></em>
+          `;
+          root.prepend(card);
+        }
+
+        card.classList.toggle("is-ok", state === "ok");
+        card.classList.toggle("is-bad", state === "bad");
+        card.querySelector("span").textContent = detail;
+        card.querySelector(".sync-status-pill").textContent = state === "ok" ? "COLLEGATO" : state === "bad" ? "NON VA" : "CONTROLLO";
+      }
+
+      async function checkCloudStatus() {
+        renderSyncStatus("checking", "Controllo connessione a Supabase...");
+
+        if (!hasRealSyncConfig()) {
+          renderSyncStatus("bad", "sync-config.js non e configurato o non e stato caricato online.");
+          return;
+        }
+
+        try {
+          const baseUrl = String(SALVADANAIO_SYNC.supabaseUrl).replace(/\/$/, "");
+          const spaceId = SALVADANAIO_SYNC.spaceId || "gabri-rossi-vacanza";
+          const url = `${baseUrl}/rest/v1/depositi?space_id=eq.${encodeURIComponent(spaceId)}&select=id&limit=1`;
+          const response = await fetch(url, {
+            headers: {
+              apikey: SALVADANAIO_SYNC.supabaseAnonKey,
+              Authorization: `Bearer ${SALVADANAIO_SYNC.supabaseAnonKey}`,
+              Accept: "application/json",
+              "Cache-Control": "no-cache"
+            }
+          });
+
+          if (!response.ok) {
+            renderSyncStatus("bad", `Supabase risponde errore ${response.status}. Controlla chiave anon e policy.`);
+            return;
+          }
+
+          renderSyncStatus("ok", "Questo dispositivo legge il cloud correttamente.");
+        } catch {
+          renderSyncStatus("bad", "Safari non riesce a raggiungere Supabase. Controlla link online e connessione.");
+        }
+      }
+
+      window.addEventListener("load", () => setTimeout(checkCloudStatus, 800));
+      document.addEventListener("click", (event) => {
+        const text = (event.target?.closest?.("button, a, .bottom-nav-item")?.textContent || "").toLowerCase();
+        if (text.includes("impost")) setTimeout(checkCloudStatus, 500);
+      });
+    })();
+  </script>
 </body>
 </html>
