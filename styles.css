@@ -2620,7 +2620,7 @@ select:focus {
 
 html,
 body {
-  background: linear-gradient(180deg, #2d1f23 0%, #8f4f34 48%, #f0a15e 100%) !important;
+  background: #fff !important;
 }
 
 @supports (padding: env(safe-area-inset-top)) {
@@ -3087,25 +3087,530 @@ label[for="depositNote"],
 :root,
 html,
 body {
-  background-color: #2d1f23 !important;
+  background-color: #fff !important;
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: max(34px, env(safe-area-inset-top));
-  z-index: 9999;
-  pointer-events: none;
-  background:
-    linear-gradient(180deg, rgba(45, 31, 35, .86) 0%, rgba(45, 31, 35, .52) 62%, rgba(45, 31, 35, 0) 100%);
+  display: none !important;
 }
 
 @media (display-mode: standalone) {
   body::before {
-    height: max(44px, env(safe-area-inset-top));
+    display: none !important;
+  }
+}
+
+.settings-media-panel {
+  width: min(100%, 980px);
+  margin: 20px auto 120px;
+  padding: 18px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, .78);
+  border: 1px solid rgba(255, 255, 255, .72);
+  box-shadow: 0 22px 70px rgba(15, 23, 42, .14);
+  backdrop-filter: blur(22px) saturate(1.35);
+  -webkit-backdrop-filter: blur(22px) saturate(1.35);
+}
+
+body:not(.settings-tab-active) .settings-media-panel {
+  display: none !important;
+}
+
+body.settings-tab-active .settings-media-panel {
+  display: block !important;
+}
+
+.settings-media-panel h2 {
+  margin: 0 0 6px;
+  color: #101820;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  letter-spacing: 0;
+}
+
+.settings-media-panel > p {
+  margin: 0 0 18px;
+  color: rgba(15, 23, 42, .66);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.media-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.media-setting-card {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  min-height: 112px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.media-preview {
+  width: 76px;
+  height: 76px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: #14212b;
+  font-weight: 900;
+  background: linear-gradient(135deg, #78eadf, #ffd166);
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 12px 28px rgba(15, 23, 42, .12);
+  background-size: cover;
+  background-position: center;
+}
+
+.media-preview.is-wide {
+  border-radius: 20px;
+  background-image: linear-gradient(135deg, #394355, #e99055);
+}
+
+.media-setting-card strong {
+  display: block;
+  color: #101820;
+  font-size: 1.02rem;
+  margin-bottom: 8px;
+}
+
+.media-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.media-upload-button,
+.media-reset-button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 13px;
+  font-weight: 800;
+  font-size: .9rem;
+  cursor: pointer;
+}
+
+.media-upload-button {
+  color: #fff;
+  background: linear-gradient(135deg, #101820, #2f3b45);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, .18);
+}
+
+.media-reset-button {
+  color: #25313b;
+  background: rgba(15, 23, 42, .07);
+}
+
+.settings-media-panel input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.custom-photo-avatar {
+  background-size: cover !important;
+  background-position: center !important;
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+.custom-home-background,
+.custom-home-background::before,
+.custom-home-background::after {
+  background-image: linear-gradient(180deg, rgba(9, 12, 22, .26), rgba(9, 12, 22, .30)), var(--custom-home-bg) !important;
+  background-size: cover !important;
+  background-position: center !important;
+}
+
+.custom-home-background img.hero-bg,
+.custom-home-background img[class*="hero"],
+.custom-home-background img[class*="beach"],
+.custom-home-background img[class*="background"] {
+  object-fit: cover !important;
+}
+
+.person-photo-badge {
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, .18);
+}
+
+@media (max-width: 720px) {
+  .settings-media-panel {
+    margin: 14px 14px 104px;
+    padding: 14px;
+    border-radius: 24px;
+  }
+
+  .media-settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.editable-expenses-panel {
+  width: min(100%, 1040px);
+  margin: 20px auto 120px;
+  padding: 18px;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, .82);
+  border: 1px solid rgba(255, 255, 255, .78);
+  box-shadow: 0 24px 78px rgba(15, 23, 42, .14);
+  backdrop-filter: blur(22px) saturate(1.28);
+  -webkit-backdrop-filter: blur(22px) saturate(1.28);
+}
+
+.editable-expenses-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.editable-expenses-head h2 {
+  margin: 0 0 5px;
+  color: #101820;
+  font-size: clamp(1.35rem, 2vw, 2.05rem);
+  letter-spacing: 0;
+}
+
+.editable-expenses-head p {
+  margin: 0;
+  color: rgba(15, 23, 42, .62);
+  line-height: 1.45;
+}
+
+.editable-expenses-total {
+  min-width: 150px;
+  padding: 12px 14px;
+  border-radius: 22px;
+  text-align: right;
+  color: #101820;
+  background: linear-gradient(135deg, rgba(53, 211, 198, .22), rgba(255, 209, 102, .24));
+  border: 1px solid rgba(15, 23, 42, .08);
+}
+
+.editable-expenses-total span {
+  display: block;
+  font-size: .78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, .54);
+}
+
+.editable-expenses-total strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 1.5rem;
+}
+
+.editable-expenses-list {
+  display: grid;
+  gap: 10px;
+}
+
+.editable-expense-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(120px, .7fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid rgba(15, 23, 42, .07);
+}
+
+.editable-expense-row input {
+  width: 100%;
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  padding: 11px 13px;
+  color: #101820;
+  background: rgba(15, 23, 42, .055);
+  font-weight: 800;
+  outline: none;
+}
+
+.editable-expense-row input:focus {
+  box-shadow: 0 0 0 3px rgba(53, 211, 198, .24);
+  background: #fff;
+}
+
+.expense-delete-button,
+.expense-add-button,
+.expense-reset-button {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 0 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.expense-delete-button {
+  width: 44px;
+  padding: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #ff6b6b, #c93636);
+  box-shadow: 0 12px 24px rgba(201, 54, 54, .20);
+}
+
+.editable-expenses-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(120px, .7fr) auto auto;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 24px;
+  background: rgba(15, 23, 42, .055);
+}
+
+.editable-expenses-add input {
+  min-height: 46px;
+  border: 0;
+  border-radius: 16px;
+  padding: 11px 13px;
+  font-weight: 800;
+  outline: none;
+  background: rgba(255, 255, 255, .82);
+}
+
+.expense-add-button {
+  color: #fff;
+  background: linear-gradient(135deg, #101820, #2f3b45);
+  box-shadow: 0 14px 26px rgba(15, 23, 42, .18);
+}
+
+.expense-reset-button {
+  color: #25313b;
+  background: rgba(15, 23, 42, .08);
+}
+
+.editable-expenses-panel-ready .expenses-summary,
+.editable-expenses-panel-ready .cost-list,
+.editable-expenses-panel-ready #costList,
+.editable-expenses-panel-ready #expensesSummary {
+  display: none !important;
+}
+
+@media (max-width: 720px) {
+  .editable-expenses-panel {
+    margin: 14px 14px 104px;
+    padding: 14px;
+    border-radius: 24px;
+  }
+
+  .editable-expenses-head {
+    display: grid;
+  }
+
+  .editable-expenses-total {
+    text-align: left;
+  }
+
+  .editable-expense-row,
+  .editable-expenses-add {
+    grid-template-columns: 1fr;
+  }
+
+  .expense-delete-button {
+    width: 100%;
+  }
+}
+
+.editable-expenses-panel {
+  padding: 14px !important;
+  border-radius: 26px !important;
+  box-sizing: border-box;
+}
+
+.editable-expenses-head {
+  align-items: center !important;
+  margin-bottom: 12px !important;
+}
+
+.editable-expenses-head h2 {
+  font-size: clamp(1.25rem, 1.8vw, 1.7rem) !important;
+  margin-bottom: 2px !important;
+}
+
+.editable-expenses-head p {
+  display: none !important;
+}
+
+.editable-expenses-total {
+  min-width: 132px !important;
+  padding: 10px 12px !important;
+  border-radius: 18px !important;
+}
+
+.editable-expenses-total strong {
+  font-size: 1.25rem !important;
+}
+
+.editable-expenses-list {
+  gap: 7px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.editable-expense-row {
+  grid-template-columns: minmax(0, 1fr) 112px 38px !important;
+  min-height: 54px !important;
+  padding: 7px !important;
+  border-radius: 18px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.editable-expense-row input {
+  min-height: 40px !important;
+  border-radius: 13px !important;
+  padding: 8px 10px !important;
+  font-size: .95rem !important;
+}
+
+.editable-expense-row .amount-euro-field::before {
+  left: 11px;
+  font-size: .9rem;
+}
+
+.editable-expense-row .amount-euro-field input {
+  padding-left: 29px !important;
+}
+
+.expense-delete-button {
+  width: 38px !important;
+  min-height: 38px !important;
+  font-size: 1.2rem !important;
+}
+
+.editable-expenses-add {
+  grid-template-columns: minmax(0, 1fr) 112px 38px !important;
+  margin-top: 10px !important;
+  padding: 9px !important;
+  border-radius: 18px !important;
+  width: 100% !important;
+  box-sizing: border-box;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.editable-expenses-add input {
+  min-height: 40px !important;
+  border-radius: 13px !important;
+  padding: 8px 10px !important;
+  font-size: .95rem !important;
+}
+
+.editable-expenses-add .amount-euro-field::before {
+  left: 11px;
+  font-size: .9rem;
+}
+
+.editable-expenses-add .amount-euro-field input {
+  padding-left: 29px !important;
+}
+
+.expense-add-button,
+.expense-reset-button {
+  min-height: 40px !important;
+  padding: 0 10px !important;
+  font-size: .9rem !important;
+}
+
+.editable-expenses-add .expense-add-button {
+  width: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+}
+
+.editable-expenses-add .expense-reset-button {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
+
+.expense-reset-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+.editable-expense-details {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: -2px;
+}
+
+.editable-expense-details span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  color: rgba(15, 23, 42, .68);
+  background: rgba(15, 23, 42, .055);
+  font-size: .76rem;
+  font-weight: 800;
+}
+
+@media (max-width: 720px) {
+  .editable-expenses-panel {
+    margin: 10px 12px 96px !important;
+    padding: 12px !important;
+  }
+
+  .editable-expenses-head {
+    display: flex !important;
+  }
+
+  .editable-expenses-total {
+    text-align: right !important;
+    min-width: 118px !important;
+  }
+
+  .editable-expense-row {
+    grid-template-columns: minmax(0, 1fr) 92px 34px !important;
+    gap: 6px !important;
+  }
+
+  .editable-expense-row input {
+    font-size: .88rem !important;
+    padding: 7px 8px !important;
+  }
+
+  .expense-delete-button {
+    width: 34px !important;
+    min-height: 34px !important;
+  }
+
+  .editable-expenses-add {
+    grid-template-columns: minmax(0, 1fr) 92px 34px !important;
+    gap: 7px !important;
+  }
+
+  .editable-expenses-add .expense-add-button {
+    grid-column: auto !important;
+    width: 34px !important;
+    min-width: 34px !important;
+  }
+
+  .editable-expenses-add .expense-reset-button {
+    grid-column: 1 / -1 !important;
   }
 }
 

@@ -2,8 +2,10 @@
 <html lang="it">
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#2d1f23">
-  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" type="image/png" href="assets/app-icon.png">
+  <link rel="apple-touch-icon" href="assets/app-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8" />
@@ -782,6 +784,414 @@
         window.setTimeout(startSmoothPhraseRotation, 350);
       });
       window.setTimeout(startSmoothPhraseRotation, 900);
+    })();
+  </script>
+  <script>
+    (() => {
+      const mediaKeys = {
+        header: "travelVaultHeaderPhoto",
+        gabri: "travelVaultGabriPhoto",
+        rossi: "travelVaultRossiPhoto",
+        home: "travelVaultHomeBackground"
+      };
+
+      function resizeImage(file, maxSize) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = reject;
+          reader.onload = () => {
+            const image = new Image();
+            image.onerror = reject;
+            image.onload = () => {
+              const scale = Math.min(1, maxSize / Math.max(image.width, image.height));
+              const canvas = document.createElement("canvas");
+              canvas.width = Math.max(1, Math.round(image.width * scale));
+              canvas.height = Math.max(1, Math.round(image.height * scale));
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+              resolve(canvas.toDataURL("image/jpeg", .86));
+            };
+            image.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function setPreview(key, value) {
+        const preview = document.querySelector(`[data-media-preview="${key}"]`);
+        if (!preview) return;
+        if (value) {
+          preview.style.backgroundImage = `url("${value}")`;
+          preview.textContent = "";
+        } else {
+          preview.style.backgroundImage = "";
+          preview.textContent = preview.dataset.fallback || "";
+        }
+      }
+
+      function applyHeaderPhoto(value) {
+        document.querySelectorAll("*").forEach((element) => {
+          if ((element.textContent || "").trim() !== "GR") return;
+          const box = element.getBoundingClientRect();
+          if (box.width < 30 || box.height < 30 || box.width > 180 || box.height > 180) return;
+          element.classList.toggle("custom-photo-avatar", Boolean(value));
+          if (value) {
+            element.style.backgroundImage = `url("${value}")`;
+          } else {
+            element.style.backgroundImage = "";
+            element.textContent = "GR";
+          }
+        });
+      }
+
+      function applyHomeBackground(value) {
+        document.querySelectorAll(".hero, .home-hero, .hero-section, .hero-media").forEach((element) => {
+          if (value) {
+            element.style.backgroundImage = `linear-gradient(180deg, rgba(9, 12, 22, .26), rgba(9, 12, 22, .30)), url("${value}")`;
+            element.style.backgroundSize = "cover";
+            element.style.backgroundPosition = "center";
+          } else {
+            element.style.backgroundImage = `linear-gradient(180deg, rgba(9, 12, 22, .26), rgba(9, 12, 22, .30)), url("assets/beach-sunset.png"), url("assets/beach-hero.svg")`;
+            element.style.backgroundSize = "cover";
+            element.style.backgroundPosition = "center";
+          }
+        });
+      }
+
+      function applyPersonPhoto(person, value) {
+        const names = person === "gabri" ? ["gabri", "gabriele"] : ["rossi", "rossella"];
+        document.querySelectorAll("*").forEach((element) => {
+          const text = (element.textContent || "").trim().toLowerCase();
+          if (!names.some((name) => text === name || text.includes(`${name} ha`) || text.includes(`${name} totale`))) return;
+          const parent = element.closest(".card, .stat-card, .person-card, .metric-card, .deposit-card, .summary-card") || element.parentElement;
+          if (!parent || parent.querySelector(`[data-person-photo="${person}"]`)) return;
+          const badge = document.createElement("span");
+          badge.className = "person-photo-badge";
+          badge.dataset.personPhoto = person;
+          badge.style.backgroundImage = value ? `url("${value}")` : "";
+          parent.insertBefore(badge, parent.firstChild);
+        });
+
+        document.querySelectorAll(`[data-person-photo="${person}"]`).forEach((badge) => {
+          if (value) {
+            badge.style.display = "";
+            badge.style.backgroundImage = `url("${value}")`;
+          } else {
+            badge.remove();
+          }
+        });
+      }
+
+      function applyAllMediaSettings() {
+        const header = localStorage.getItem(mediaKeys.header);
+        const gabri = localStorage.getItem(mediaKeys.gabri);
+        const rossi = localStorage.getItem(mediaKeys.rossi);
+        const home = localStorage.getItem(mediaKeys.home);
+
+        setPreview("header", header);
+        setPreview("gabri", gabri);
+        setPreview("rossi", rossi);
+        setPreview("home", home);
+        applyHeaderPhoto(header);
+        applyPersonPhoto("gabri", gabri);
+        applyPersonPhoto("rossi", rossi);
+        applyHomeBackground(home);
+      }
+
+      function findSettingsContainer() {
+        const candidates = [...document.querySelectorAll("section, main > div, .view, .screen, .tab-panel, [data-view], [id], [class]")];
+        return candidates.find((element) => {
+          const idClass = `${element.id || ""} ${element.className || ""}`.toLowerCase();
+          const text = (element.textContent || "").toLowerCase();
+          return idClass.includes("setting") || idClass.includes("impost") || text.includes("impostazioni");
+        }) || document.querySelector("main") || document.body;
+      }
+
+      function createMediaSettingsPanel() {
+        if (document.querySelector(".settings-media-panel")) return;
+        const container = findSettingsContainer();
+        const panel = document.createElement("section");
+        panel.className = "settings-media-panel";
+        panel.innerHTML = `
+          <h2>Personalizza app</h2>
+          <p>Cambia immagini principali della home e dei profili.</p>
+          <div class="media-settings-grid">
+            ${[
+              ["header", "Foto header GR", "GR", "Cambia foto"],
+              ["gabri", "Foto Gabri", "G", "Cambia foto"],
+              ["rossi", "Foto Rossi", "R", "Cambia foto"],
+              ["home", "Sfondo Home", "", "Cambia sfondo"]
+            ].map(([key, title, fallback, label]) => `
+              <article class="media-setting-card">
+                <span class="media-preview ${key === "home" ? "is-wide" : ""}" data-media-preview="${key}" data-fallback="${fallback}">${fallback}</span>
+                <div>
+                  <strong>${title}</strong>
+                  <div class="media-actions">
+                    <label class="media-upload-button">
+                      ${label}
+                      <input type="file" accept="image/*" data-media-input="${key}">
+                    </label>
+                    <button class="media-reset-button" type="button" data-media-reset="${key}">Reset</button>
+                  </div>
+                </div>
+              </article>
+            `).join("")}
+          </div>
+        `;
+        container.appendChild(panel);
+
+        panel.querySelectorAll("[data-media-input]").forEach((input) => {
+          input.addEventListener("change", async () => {
+            const file = input.files?.[0];
+            if (!file) return;
+            const key = input.dataset.mediaInput;
+            const image = await resizeImage(file, key === "home" ? 1600 : 640);
+            localStorage.setItem(mediaKeys[key], image);
+            applyAllMediaSettings();
+            input.value = "";
+          });
+        });
+
+        panel.querySelectorAll("[data-media-reset]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const key = button.dataset.mediaReset;
+            localStorage.removeItem(mediaKeys[key]);
+            applyAllMediaSettings();
+          });
+        });
+
+        applyAllMediaSettings();
+      }
+
+      createMediaSettingsPanel();
+      applyAllMediaSettings();
+      window.addEventListener("load", () => {
+        createMediaSettingsPanel();
+        applyAllMediaSettings();
+      });
+      setInterval(applyAllMediaSettings, 2500);
+    })();
+  </script>
+  <script>
+    (() => {
+      const defaultExpenses = [
+        { id: "flight", name: "Volo", qty: "2 persone", unit: 860, amount: 1720 },
+        { id: "stay", name: "Alloggio", qty: "11 notti", unit: 90, amount: 990 },
+        { id: "transfers", name: "Trasferimenti", qty: "1", unit: 150, amount: 150 },
+        { id: "food", name: "Pasti", qty: "24 pasti", unit: 30, amount: 720 },
+        { id: "tours", name: "Escursioni", qty: "2", unit: 250, amount: 500 },
+        { id: "visa", name: "Visto", qty: "2", unit: 50, amount: 100 },
+        { id: "insurance", name: "Assicurazione", qty: "2", unit: 50, amount: 100 },
+        { id: "shopping", name: "Shopping & souvenir", qty: "2", unit: 100, amount: 200 },
+        { id: "extra", name: "Extra", qty: "2", unit: 100, amount: 200 }
+      ];
+
+      const expensesKey = "travelVaultEditableExpenses";
+      const euro = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+
+      function loadEditableExpenses() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(expensesKey) || "null");
+          return Array.isArray(saved) ? saved : defaultExpenses;
+        } catch {
+          return defaultExpenses;
+        }
+      }
+
+      function saveEditableExpenses(expenses) {
+        localStorage.setItem(expensesKey, JSON.stringify(expenses));
+      }
+
+      function findExpensesContainer() {
+        const preferred = document.querySelector("[data-view='expenses'], [data-view='spese'], #expenses, #spese, #expensesView, #speseView, .expenses-view, .spese-view");
+        if (preferred) return preferred;
+
+        const sections = [...document.querySelectorAll("section, main > div, .view, .screen, .tab-panel")];
+        return sections.find((element) => {
+          const text = (element.textContent || "").toLowerCase();
+          const idClass = `${element.id || ""} ${element.className || ""}`.toLowerCase();
+          return idClass.includes("expense") || idClass.includes("spese") || text.includes("spese previste") || text.includes("totale finale");
+        }) || document.querySelector("main") || document.body;
+      }
+
+      function renderEditableExpenses() {
+        const container = findExpensesContainer();
+        if (!container) return;
+        container.classList.add("editable-expenses-panel-ready");
+
+        let panel = container.querySelector(".editable-expenses-panel");
+        if (!panel) {
+          panel = document.createElement("section");
+          panel.className = "editable-expenses-panel";
+          container.appendChild(panel);
+        }
+
+        const expenses = loadEditableExpenses();
+        const total = expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+
+        panel.innerHTML = `
+          <div class="editable-expenses-head">
+            <div>
+              <h2>Spese previste</h2>
+            </div>
+            <div class="editable-expenses-total">
+              <span>Totale</span>
+              <strong>${euro.format(total)}</strong>
+            </div>
+          </div>
+          <div class="editable-expenses-list">
+            ${expenses.map((item) => `
+              <article class="editable-expense-row" data-expense-id="${item.id}">
+                <input class="expense-name-input" type="text" value="${String(item.name).replaceAll('"', "&quot;")}" aria-label="Nome spesa">
+                <span class="amount-euro-field">
+                  <input class="expense-amount-input" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(item.amount || 0)}" aria-label="Importo spesa">
+                </span>
+                <button class="expense-delete-button" type="button" aria-label="Elimina spesa">×</button>
+                <div class="editable-expense-details">
+                  ${item.qty ? `<span>${item.qty}</span>` : ""}
+                  ${item.unit ? `<span>${euro.format(Number(item.unit || 0))} cad.</span>` : ""}
+                </div>
+              </article>
+            `).join("")}
+          </div>
+          <div class="editable-expenses-add">
+            <input id="newExpenseName" type="text" placeholder="Nuova spesa" aria-label="Nuova spesa">
+            <span class="amount-euro-field">
+              <input id="newExpenseAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0,00" aria-label="Importo nuova spesa">
+            </span>
+            <button class="expense-add-button" type="button">+</button>
+            <button class="expense-reset-button" type="button">Ripristina</button>
+          </div>
+        `;
+
+        panel.querySelectorAll(".editable-expense-row").forEach((row) => {
+          const id = row.dataset.expenseId;
+          const nameInput = row.querySelector(".expense-name-input");
+          const amountInput = row.querySelector(".expense-amount-input");
+          const deleteButton = row.querySelector(".expense-delete-button");
+
+          function updateItem() {
+            const updated = loadEditableExpenses().map((item) => {
+              if (item.id !== id) return item;
+              return {
+                ...item,
+                name: nameInput.value.trim() || "Spesa",
+                amount: Number(String(amountInput.value).replace(",", ".")) || 0
+              };
+            });
+            saveEditableExpenses(updated);
+            renderEditableExpenses();
+          }
+
+          nameInput.addEventListener("change", updateItem);
+          amountInput.addEventListener("change", updateItem);
+          deleteButton.addEventListener("click", () => {
+            saveEditableExpenses(loadEditableExpenses().filter((item) => item.id !== id));
+            renderEditableExpenses();
+          });
+        });
+
+        panel.querySelector(".expense-add-button")?.addEventListener("click", () => {
+          const name = panel.querySelector("#newExpenseName")?.value.trim();
+          const amount = Number(String(panel.querySelector("#newExpenseAmount")?.value || "0").replace(",", ".")) || 0;
+          if (!name) return;
+          const next = [...loadEditableExpenses(), { id: `expense-${Date.now()}`, name, amount }];
+          saveEditableExpenses(next);
+          renderEditableExpenses();
+        });
+
+        panel.querySelector(".expense-reset-button")?.addEventListener("click", () => {
+          saveEditableExpenses(defaultExpenses);
+          renderEditableExpenses();
+        });
+      }
+
+      renderEditableExpenses();
+      window.addEventListener("load", renderEditableExpenses);
+      setTimeout(renderEditableExpenses, 700);
+      setTimeout(renderEditableExpenses, 1600);
+    })();
+  </script>
+  <script>
+    (() => {
+      function syncSettingsPanelVisibility(source) {
+        const text = (source?.textContent || "").toLowerCase();
+        if (text.includes("impost")) {
+          document.body.classList.add("settings-tab-active");
+          return;
+        }
+
+        if (text.includes("home") || text.includes("deposita") || text.includes("statistiche") || text.includes("spese")) {
+          document.body.classList.remove("settings-tab-active");
+        }
+      }
+
+      document.addEventListener("click", (event) => {
+        const navItem = event.target.closest(".bottom-nav-item, [data-view], [data-target], button, a");
+        if (navItem) syncSettingsPanelVisibility(navItem);
+      });
+
+      window.addEventListener("load", () => {
+        document.body.classList.remove("settings-tab-active");
+      });
+    })();
+  </script>
+  <script>
+    (() => {
+      const homeBgKey = "travelVaultHomeBackground";
+
+      function forceHomeBackground() {
+        const saved = localStorage.getItem(homeBgKey);
+        const fallback = "url('assets/beach-sunset.png'), url('assets/beach-hero.svg')";
+        const bg = saved ? `url("${saved}")` : fallback;
+
+        document.documentElement.style.setProperty("--custom-home-bg", bg);
+
+        document.querySelectorAll(".hero, .home-hero, .hero-section, .hero-media").forEach((hero) => {
+          hero.classList.add("custom-home-background");
+          hero.style.setProperty("--custom-home-bg", bg);
+          hero.style.backgroundImage = `linear-gradient(180deg, rgba(9, 12, 22, .26), rgba(9, 12, 22, .30)), ${bg}`;
+          hero.style.backgroundSize = "cover";
+          hero.style.backgroundPosition = "center";
+
+          hero.querySelectorAll("img").forEach((img) => {
+            const src = (img.getAttribute("src") || "").toLowerCase();
+            const cls = (img.className || "").toString().toLowerCase();
+            const looksLikeBg = src.includes("beach") || src.includes("vacanza") || cls.includes("hero") || cls.includes("background") || cls.includes("bg");
+            if (saved && looksLikeBg) {
+              img.src = saved;
+              img.style.objectFit = "cover";
+              img.style.objectPosition = "center";
+            } else if (!saved && looksLikeBg) {
+              img.src = "assets/beach-sunset.png";
+              img.onerror = () => {
+                img.onerror = null;
+                img.src = "assets/beach-hero.svg";
+              };
+              img.style.objectFit = "cover";
+              img.style.objectPosition = "center";
+            }
+          });
+        });
+      }
+
+      forceHomeBackground();
+      window.addEventListener("load", forceHomeBackground);
+      document.addEventListener("change", (event) => {
+        if (event.target?.matches?.("[data-media-input='home']")) {
+          setTimeout(forceHomeBackground, 350);
+          setTimeout(forceHomeBackground, 900);
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (event.target?.matches?.("[data-media-reset='home']")) {
+          localStorage.removeItem(homeBgKey);
+          forceHomeBackground();
+          setTimeout(forceHomeBackground, 100);
+          setTimeout(forceHomeBackground, 500);
+        }
+      });
+      setInterval(forceHomeBackground, 3000);
     })();
   </script>
 </body>
