@@ -3,6 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#2d1f23">
+  <meta name="color-scheme" content="dark">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta charset="UTF-8" />
@@ -269,6 +270,85 @@
       lastTouchEnd = now;
     }, { passive: false });
 
+    function normalizeHomeIcon() {
+      document.querySelectorAll(".bottom-nav-item, [data-view], [data-target], button, a").forEach((item) => {
+        const label = (item.textContent || "").trim().toLowerCase();
+        if (!label.includes("home")) return;
+        const icon = item.querySelector(".nav-icon, .icon, span");
+        if (!icon) return;
+        icon.textContent = "⌂";
+        icon.classList.add("home-nav-icon");
+      });
+    }
+
+    normalizeHomeIcon();
+
+    function removeHeroDescription() {
+      const phrases = [
+        "state costruendo il viaggio",
+        "un passo alla volta",
+        "soldi su revolut",
+        "budget sotto controllo",
+        "obiettivo sempre davanti"
+      ];
+
+      document.querySelectorAll(".hero p, .home-hero p, .hero-section p, .hero-media p, [id*='Subtitle'], [class*='subtitle'], [class*='description']").forEach((element) => {
+        const text = (element.textContent || "").trim().toLowerCase();
+        if (!text) return;
+        if (phrases.some((phrase) => text.includes(phrase))) {
+          element.remove();
+        }
+      });
+    }
+
+    removeHeroDescription();
+    window.addEventListener("load", removeHeroDescription);
+    setTimeout(removeHeroDescription, 500);
+    setTimeout(removeHeroDescription, 1500);
+
+    function setupHeroMotivationRotation() {
+      const phrases = [
+        "La partenza si avvicina.",
+        "Ogni euro vi porta piu lontano.",
+        "Il viaggio cresce con voi.",
+        "State costruendo un ricordo enorme.",
+        "Un passo alla volta, si arriva ovunque.",
+        "La meta e piu vicina di ieri.",
+        "Ogni deposito sa gia di mare.",
+        "Il vostro piano sta diventando realta.",
+        "Continuate cosi, manca sempre meno.",
+        "La vacanza inizia da qui.",
+        "Ogni piccolo gesto conta davvero.",
+        "Il salvadanaio sta facendo strada.",
+        "Marzo 2027 vi aspetta.",
+        "Il sogno prende forma ogni giorno.",
+        "Piu costanza, piu tramonti insieme.",
+        "La vostra fuga sta crescendo.",
+        "Oggi siete piu vicini alla partenza.",
+        "Il viaggio si costruisce in due.",
+        "Ogni cifra racconta un pezzo di voi.",
+        "La prossima avventura sta arrivando."
+      ];
+
+      const title = document.querySelector(".hero-copy h1, .hero-text h1, .hero-message h1, .hero-intro h1, .hero-content h1");
+      if (!title) return;
+
+      let index = 0;
+      title.textContent = phrases[index];
+
+      setInterval(() => {
+        index = (index + 1) % phrases.length;
+        title.classList.remove("phrase-changing");
+        void title.offsetWidth;
+        title.classList.add("phrase-changing");
+        setTimeout(() => {
+          title.textContent = phrases[index];
+        }, 180);
+      }, 10000);
+    }
+
+    setupHeroMotivationRotation();
+
     function setupEuroAmountInputs() {
       const amountInputs = [...document.querySelectorAll("input")].filter((input) => {
         const text = `${input.id || ""} ${input.name || ""} ${input.placeholder || ""} ${input.getAttribute("aria-label") || ""}`.toLowerCase();
@@ -495,6 +575,213 @@
           subtree: true
         });
       }
+    })();
+  </script>
+  <script>
+    (() => {
+      const heroPhrasesEveryFiveSeconds = [
+        "La partenza si avvicina.",
+        "Ogni euro vi porta piu lontano.",
+        "Il viaggio cresce con voi.",
+        "State costruendo un ricordo enorme.",
+        "Un passo alla volta, si arriva ovunque.",
+        "La meta e piu vicina di ieri.",
+        "Ogni deposito sa gia di mare.",
+        "Il vostro piano sta diventando realta.",
+        "Continuate cosi, manca sempre meno.",
+        "La vacanza inizia da qui.",
+        "Ogni piccolo gesto conta davvero.",
+        "Il salvadanaio sta facendo strada.",
+        "Marzo 2027 vi aspetta.",
+        "Il sogno prende forma ogni giorno.",
+        "Piu costanza, piu tramonti insieme.",
+        "La vostra fuga sta crescendo.",
+        "Oggi siete piu vicini alla partenza.",
+        "Il viaggio si costruisce in due.",
+        "Ogni cifra racconta un pezzo di voi.",
+        "La prossima avventura sta arrivando."
+      ];
+
+      function findHeroTitle() {
+        return document.querySelector(".hero-copy h1, .hero-text h1, .hero-message h1, .hero-intro h1, .hero-content h1");
+      }
+
+      function startFiveSecondHeroRotation() {
+        const title = findHeroTitle();
+        if (!title || title.dataset.fiveSecondRotation === "true") return;
+
+        title.dataset.fiveSecondRotation = "true";
+        let index = Math.max(0, heroPhrasesEveryFiveSeconds.indexOf(title.textContent.trim()));
+        title.textContent = heroPhrasesEveryFiveSeconds[index];
+
+        setInterval(() => {
+          index = (index + 1) % heroPhrasesEveryFiveSeconds.length;
+          title.classList.remove("phrase-changing");
+          void title.offsetWidth;
+          title.classList.add("phrase-changing");
+          setTimeout(() => {
+            title.textContent = heroPhrasesEveryFiveSeconds[index];
+          }, 180);
+        }, 10000);
+      }
+
+      startFiveSecondHeroRotation();
+      window.addEventListener("load", startFiveSecondHeroRotation);
+      setTimeout(startFiveSecondHeroRotation, 500);
+      setTimeout(startFiveSecondHeroRotation, 1500);
+    })();
+  </script>
+  <script>
+    (() => {
+      const forcedHeroPhrases = [
+        "La partenza si avvicina.",
+        "Ogni euro vi porta piu lontano.",
+        "Il viaggio cresce con voi.",
+        "State costruendo un ricordo enorme.",
+        "Un passo alla volta, si arriva ovunque.",
+        "La meta e piu vicina di ieri.",
+        "Ogni deposito sa gia di mare.",
+        "Il vostro piano sta diventando realta.",
+        "Continuate cosi, manca sempre meno.",
+        "La vacanza inizia da qui.",
+        "Ogni piccolo gesto conta davvero.",
+        "Il salvadanaio sta facendo strada.",
+        "Marzo 2027 vi aspetta.",
+        "Il sogno prende forma ogni giorno.",
+        "Piu costanza, piu tramonti insieme.",
+        "La vostra fuga sta crescendo.",
+        "Oggi siete piu vicini alla partenza.",
+        "Il viaggio si costruisce in due.",
+        "Ogni cifra racconta un pezzo di voi.",
+        "La prossima avventura sta arrivando."
+      ];
+
+      function isVisible(element) {
+        const box = element.getBoundingClientRect();
+        return box.width > 20 && box.height > 20;
+      }
+
+      function getHeroPhraseTargets() {
+        const directTargets = [
+          "#dailyPhrase",
+          "#heroPhrase",
+          ".daily-phrase",
+          ".hero-phrase",
+          ".hero-copy h1",
+          ".hero-text h1",
+          ".hero-message h1",
+          ".hero-intro h1",
+          ".hero-content h1"
+        ];
+
+        const found = directTargets.flatMap((selector) => [...document.querySelectorAll(selector)]);
+        const hero = document.querySelector(".hero, .home-hero, .hero-section, .hero-media");
+        if (hero) {
+          found.push(...hero.querySelectorAll("h1"));
+        }
+
+        return [...new Set(found)].filter(isVisible);
+      }
+
+      function forceFiveSecondPhrases() {
+        if (window.__salvadanaioHeroPhraseTimer) {
+          clearInterval(window.__salvadanaioHeroPhraseTimer);
+        }
+
+        let index = 0;
+        const firstTarget = getHeroPhraseTargets()[0];
+        if (firstTarget) {
+          const current = forcedHeroPhrases.indexOf(firstTarget.textContent.trim());
+          index = current >= 0 ? current : 0;
+        }
+
+        function renderPhrase() {
+          const targets = getHeroPhraseTargets();
+          if (!targets.length) return;
+
+          targets.forEach((target) => {
+            target.classList.remove("phrase-changing");
+            void target.offsetWidth;
+            target.classList.add("phrase-changing");
+            target.textContent = forcedHeroPhrases[index];
+          });
+
+          index = (index + 1) % forcedHeroPhrases.length;
+        }
+
+        renderPhrase();
+        window.__salvadanaioHeroPhraseTimer = setInterval(renderPhrase, 10000);
+      }
+
+      forceFiveSecondPhrases();
+      window.addEventListener("load", forceFiveSecondPhrases);
+      setTimeout(forceFiveSecondPhrases, 700);
+      setTimeout(forceFiveSecondPhrases, 1800);
+    })();
+  </script>
+  <script>
+    (() => {
+      const smoothPhrases = [
+        "La partenza si avvicina.",
+        "Ogni euro vi porta piu lontano.",
+        "Il viaggio cresce con voi.",
+        "State costruendo un ricordo enorme.",
+        "Un passo alla volta, si arriva ovunque.",
+        "La meta e piu vicina di ieri.",
+        "Ogni deposito sa gia di mare.",
+        "Il vostro piano sta diventando realta.",
+        "Continuate cosi, manca sempre meno.",
+        "La vacanza inizia da qui.",
+        "Ogni piccolo gesto conta davvero.",
+        "Il salvadanaio sta facendo strada.",
+        "Marzo 2027 vi aspetta.",
+        "Il sogno prende forma ogni giorno.",
+        "Piu costanza, piu tramonti insieme.",
+        "La vostra fuga sta crescendo.",
+        "Oggi siete piu vicini alla partenza.",
+        "Il viaggio si costruisce in due.",
+        "Ogni cifra racconta un pezzo di voi.",
+        "La prossima avventura sta arrivando."
+      ];
+
+      function getSmoothPhraseTitle() {
+        const hero = document.querySelector(".hero, .home-hero, .hero-section, .hero-media");
+        return hero?.querySelector("h1") || document.querySelector(".hero-copy h1, .hero-text h1, .hero-message h1, .hero-intro h1, .hero-content h1");
+      }
+
+      function stopOldPhraseTimers() {
+        const lastTimer = window.setInterval(() => {}, 60000);
+        for (let id = 1; id <= lastTimer; id += 1) {
+          window.clearInterval(id);
+        }
+      }
+
+      function startSmoothPhraseRotation() {
+        stopOldPhraseTimers();
+
+        const title = getSmoothPhraseTitle();
+        if (!title) return;
+
+        let index = 0;
+        title.classList.remove("phrase-changing", "is-leaving");
+        title.classList.add("hero-phrase-smooth");
+        title.textContent = smoothPhrases[index];
+
+        window.__smoothPhraseTimer = window.setInterval(() => {
+          title.classList.add("is-leaving");
+
+          window.setTimeout(() => {
+            index = (index + 1) % smoothPhrases.length;
+            title.textContent = smoothPhrases[index];
+            title.classList.remove("is-leaving");
+          }, 560);
+        }, 10000);
+      }
+
+      window.addEventListener("load", () => {
+        window.setTimeout(startSmoothPhraseRotation, 350);
+      });
+      window.setTimeout(startSmoothPhraseRotation, 900);
     })();
   </script>
 </body>

@@ -2556,6 +2556,68 @@ select:focus {
   text-shadow: none !important;
 }
 
+.home-nav-icon {
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-size: 1.35rem !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  transform: translateY(-1px);
+}
+
+.hero-copy h1,
+.hero-text h1,
+.hero-message h1,
+.hero-intro h1,
+.hero-content h1 {
+  min-height: 2.3em;
+  display: grid;
+  place-items: center;
+  align-content: center;
+}
+
+.hero-copy p,
+.hero-text p,
+.hero-message p,
+.hero-intro p,
+.hero-content p,
+#dailySubtitle,
+#heroSubtitle {
+  display: none !important;
+}
+
+.phrase-changing {
+  animation: none !important;
+}
+
+.hero-phrase-smooth {
+  transition: opacity .55s ease, transform .55s ease, filter .55s ease;
+  will-change: opacity, transform, filter;
+}
+
+.hero-phrase-smooth.is-leaving {
+  opacity: 0;
+  transform: translateY(8px);
+  filter: blur(3px);
+}
+
+@keyframes phraseSwap {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  45% {
+    opacity: .22;
+    transform: translateY(-3px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
 html,
 body {
   background: linear-gradient(180deg, #2d1f23 0%, #8f4f34 48%, #f0a15e 100%) !important;
@@ -3019,6 +3081,31 @@ label[for="depositNote"],
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+}
+
+:root,
+html,
+body {
+  background-color: #2d1f23 !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: max(34px, env(safe-area-inset-top));
+  z-index: 9999;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(45, 31, 35, .86) 0%, rgba(45, 31, 35, .52) 62%, rgba(45, 31, 35, 0) 100%);
+}
+
+@media (display-mode: standalone) {
+  body::before {
+    height: max(44px, env(safe-area-inset-top));
   }
 }
 
