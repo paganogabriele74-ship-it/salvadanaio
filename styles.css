@@ -2571,6 +2571,67 @@ textarea {
   touch-action: manipulation;
 }
 
+.amount-euro-field {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.amount-euro-field::before {
+  content: "€";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  color: rgba(15, 23, 42, .72);
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.amount-euro-field input {
+  width: 100%;
+  padding-left: 42px !important;
+}
+
+#depositNote,
+label[for="depositNote"],
+.deposit-note,
+.note-field,
+.field-note {
+  display: none !important;
+}
+
+.deposit-copy,
+.deposit-subtitle,
+.deposit-description,
+.deposit-helper,
+.deposit-panel p {
+  display: none !important;
+}
+
+.deposit-history,
+.history-list,
+.deposit-timeline,
+.saved-deposits,
+#depositHistory,
+#depositList,
+#savedDeposits {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.deposit-history p,
+.history-list p,
+.deposit-timeline p,
+.saved-deposits p,
+#depositHistory p,
+#depositList p,
+#savedDeposits p {
+  display: block !important;
+}
+
 @media (min-width: 900px) {
   body {
     overflow-x: hidden;

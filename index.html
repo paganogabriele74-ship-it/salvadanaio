@@ -266,6 +266,59 @@
       lastTouchEnd = now;
     }, { passive: false });
 
+    function setupEuroAmountInputs() {
+      const amountInputs = [...document.querySelectorAll("input")].filter((input) => {
+        const text = `${input.id || ""} ${input.name || ""} ${input.placeholder || ""} ${input.getAttribute("aria-label") || ""}`.toLowerCase();
+        return text.includes("importo") || text.includes("amount") || text.includes("deposit");
+      });
+
+      amountInputs.forEach((input) => {
+        input.setAttribute("inputmode", "decimal");
+        input.setAttribute("pattern", "[0-9]*[.,]?[0-9]*");
+        input.setAttribute("autocomplete", "off");
+        input.setAttribute("enterkeyhint", "done");
+
+        if (input.parentElement?.classList.contains("amount-euro-field")) return;
+
+        const wrapper = document.createElement("span");
+        wrapper.className = "amount-euro-field";
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+      });
+    }
+
+    setupEuroAmountInputs();
+
+    function cleanDepositForm() {
+      document.querySelectorAll("p, small, span, label").forEach((element) => {
+        const text = (element.textContent || "").trim().toLowerCase();
+        const isRevolutHint = text.includes("revolut") && (text.includes("segn") || text.includes("spost"));
+        const isNoteLabel = text === "nota";
+        if (!isRevolutHint && !isNoteLabel) return;
+
+        const removable = element.closest("label, p, small, .field, .form-field, .input-group, .deposit-field") || element;
+        removable.remove();
+      });
+
+      document.querySelectorAll("textarea, input").forEach((element) => {
+        const text = `${element.placeholder || ""} ${element.getAttribute("aria-label") || ""} ${element.id || ""} ${element.name || ""}`.trim().toLowerCase();
+        const isNoteInput = text.includes("depositnote") || text === "nota" || text === "note";
+        if (!isNoteInput) return;
+
+        const removable = element.closest(".field, .form-field, .input-group, .deposit-field, label") || element;
+        removable.remove();
+      });
+    }
+
+    cleanDepositForm();
+    window.addEventListener("load", cleanDepositForm);
+    setTimeout(cleanDepositForm, 300);
+    setTimeout(cleanDepositForm, 1000);
+    new MutationObserver(cleanDepositForm).observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
     (() => {
       const total = document.querySelector("#savedTotal");
       if (!total) return;
