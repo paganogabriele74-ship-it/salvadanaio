@@ -864,6 +864,10 @@
           const text = (element.textContent || "").trim().toLowerCase();
           if (!names.some((name) => text === name || text.includes(`${name} ha`) || text.includes(`${name} totale`))) return;
           const parent = element.closest(".card, .stat-card, .person-card, .metric-card, .deposit-card, .summary-card") || element.parentElement;
+          const scopeText = (parent?.closest("section, .view, .screen, .tab-panel, [data-view]")?.textContent || "").toLowerCase();
+          const scopeClass = `${parent?.closest("section, .view, .screen, .tab-panel, [data-view]")?.className || ""} ${parent?.closest("section, .view, .screen, .tab-panel, [data-view]")?.id || ""} ${parent?.closest("section, .view, .screen, .tab-panel, [data-view]")?.getAttribute?.("data-view") || ""}`.toLowerCase();
+          if (scopeText.includes("insieme") && scopeText.includes("statistiche")) return;
+          if (scopeClass.includes("stat") || scopeClass.includes("statistiche")) return;
           if (!parent || parent.querySelector(`[data-person-photo="${person}"]`)) return;
           const badge = document.createElement("span");
           badge.className = "person-photo-badge";
@@ -1104,6 +1108,17 @@
           saveEditableExpenses(defaultExpenses);
           renderEditableExpenses();
         });
+
+        [...container.querySelectorAll(".card, .panel, .glass-card, .summary-card, .expense-card, .expenses-card, .expenses-summary, #expensesSummary")].forEach((element) => {
+          if (element === panel || element.contains(panel) || panel.contains(element)) return;
+          const text = (element.textContent || "").replace(/\s+/g, " ").trim();
+          const hasUsefulControls = element.querySelector("input, button, select, textarea");
+          const looksEmpty = text.length < 8 && !hasUsefulControls;
+          const isOldExpenseSummary = element.className.toString().toLowerCase().includes("expense") || element.id.toLowerCase().includes("expense");
+          if (looksEmpty || isOldExpenseSummary) {
+            element.style.display = "none";
+          }
+        });
       }
 
       renderEditableExpenses();
@@ -1192,6 +1207,41 @@
         }
       });
       setInterval(forceHomeBackground, 3000);
+    })();
+  </script>
+  <script>
+    (() => {
+      function fixStatsInitialTab() {
+        const statsArea = [...document.querySelectorAll("section, .view, .screen, .tab-panel, [data-view]")].find((element) => {
+          const text = (element.textContent || "").toLowerCase();
+          const meta = `${element.id || ""} ${element.className || ""} ${element.getAttribute?.("data-view") || ""}`.toLowerCase();
+          return meta.includes("stat") || text.includes("gabri") && text.includes("rossi") && text.includes("insieme");
+        });
+        if (!statsArea) return;
+
+        const buttons = [...statsArea.querySelectorAll("button, [role='tab'], [data-stats-person], [data-person]")].filter((button) => {
+          const text = (button.textContent || "").trim().toLowerCase();
+          return ["gabri", "rossi", "insieme"].includes(text);
+        });
+        if (!buttons.length) return;
+
+        const active = buttons.find((button) => button.classList.contains("active") || button.getAttribute("aria-selected") === "true");
+        if (!active) {
+          buttons[0].classList.add("active", "is-active");
+          buttons[0].setAttribute("aria-selected", "true");
+        }
+
+        const indicator = statsArea.querySelector("#statsSwitchIndicator, .stats-switch-indicator, .switch-indicator, .stats-indicator");
+        const target = active || buttons[0];
+        if (indicator && target) {
+          indicator.style.width = `${target.offsetWidth}px`;
+          indicator.style.transform = `translateX(${target.offsetLeft}px)`;
+        }
+      }
+
+      fixStatsInitialTab();
+      window.addEventListener("load", fixStatsInitialTab);
+      setTimeout(fixStatsInitialTab, 500);
     })();
   </script>
 </body>

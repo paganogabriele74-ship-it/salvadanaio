@@ -3247,6 +3247,30 @@ body.settings-tab-active .settings-media-panel {
   box-shadow: 0 12px 30px rgba(15, 23, 42, .18);
 }
 
+.stats-layout .person-photo-badge,
+.stats-view .person-photo-badge,
+.statistics-view .person-photo-badge,
+#stats .person-photo-badge,
+#statistics .person-photo-badge,
+[data-view="stats"] .person-photo-badge,
+[data-view="statistics"] .person-photo-badge,
+[data-view="statistiche"] .person-photo-badge {
+  display: none !important;
+}
+
+.stats-switch,
+.stats-tabs,
+.stats-toggle {
+  position: relative;
+}
+
+.stats-switch button:first-child,
+.stats-tabs button:first-child,
+.stats-toggle button:first-child,
+[data-stats-person]:first-child {
+  color: #fff;
+}
+
 @media (max-width: 720px) {
   .settings-media-panel {
     margin: 14px 14px 104px;
@@ -3437,6 +3461,9 @@ body.settings-tab-active .settings-media-panel {
   padding: 14px !important;
   border-radius: 26px !important;
   box-sizing: border-box;
+  width: min(100% - 28px, 760px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 
 .editable-expenses-head {
